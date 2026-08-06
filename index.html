@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retirement Relocation — NC, TN & VA Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --paper:#EEF1ED;
+    --ink:#20262B;
+    --ledger:#1F4D36;
+    --ledger-light:#2E6B4D;
+    --brass:#B7862C;
+    --rust:#A9462A;
+    --nc:#3C5A78;
+    --tn:#8B5E3C;
+    --va:#5A3E72;
+    --line:#C7CBC2;
+    --card:#F8F9F6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:'Source Serif 4',serif;
+    font-weight:700;
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+
+  /* HERO */
+  .hero{
+    background:var(--ledger);
+    color:var(--paper);
+    padding:clamp(24px,4vw,40px) 24px clamp(28px,4.5vw,44px);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(
+      to bottom, rgba(238,241,237,0.05) 0, rgba(238,241,237,0.05) 1px, transparent 1px, transparent 28px
+    );
+    pointer-events:none;
+  }
+  .hero-inner{max-width:1080px;margin:0 auto;position:relative;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--brass);
+    margin-bottom:10px;
+  }
+  .hero h1{font-size:clamp(22px,3.2vw,32px);line-height:1.15;max-width:680px;}
+  .hero p.lede{max-width:600px;margin-top:10px;color:#D8DECC;font-size:14px;line-height:1.45;min-height:2.6em;}
+  .hero-stat{
+    margin-top:20px;
+    display:flex;
+    gap:clamp(20px,4vw,40px);
+    flex-wrap:wrap;
+  }
+  .hero-stat div{font-family:'IBM Plex Mono',monospace;}
+  .hero-stat .num{font-size:22px;color:#fff;font-weight:600;}
+  .hero-stat .num .tone-nc{color:#9FC2E8;}
+  .hero-stat .num .tone-tn{color:#E8B97A;}
+  .hero-stat .winner-tag-sub{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:2px 6px;
+    border-radius:2px;
+    color:#fff;
+    margin:4px 0 2px;
+  }
+  .hero-stat .lab{font-size:11px;color:#AAB7A0;text-transform:uppercase;letter-spacing:.06em;}
+  @media(max-width:600px){
+    .hero-stat{gap:20px;}
+    .hero-stat .num{font-size:19px;}
+  }
+
+  /* NAV */
+  nav.tabs{
+    display:flex;
+    gap:4px;
+    margin:-18px 0 0;
+    position:relative;
+    z-index:2;
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-bottom:none;
+    padding:12px 18px;
+    cursor:pointer;
+    color:var(--ink);
+    border-radius:4px 4px 0 0;
+    opacity:.55;
+  }
+  nav.tabs button.active{opacity:1; background:#fff; border-color:var(--ledger); box-shadow:0 -2px 0 var(--ledger) inset;}
+
+  section.panel{
+    background:#fff;
+    border:1px solid var(--line);
+    padding:32px;
+    display:none;
+  }
+  section.panel.active{display:block;}
+
+  /* CALCULATOR */
+  .calc-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    margin-top:8px;
+  }
+  @media(max-width:720px){.calc-grid{grid-template-columns:1fr;}}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#5b6359;
+    margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    background:var(--card);
+  }
+  .field{margin-bottom:18px;}
+
+  h2.section-title{
+    font-size:22px;
+    border-bottom:2px solid var(--ledger);
+    padding-bottom:10px;
+    margin-bottom:20px;
+  }
+  h3.sub{font-size:15px;text-transform:uppercase;letter-spacing:.05em;color:#5b6359;margin:28px 0 12px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  /* LEDGER ROWS (signature element) */
+  .ledger-row{
+    display:grid;
+    grid-template-columns:170px 1fr 110px;
+    align-items:center;
+    gap:14px;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .ledger-row:hover{background:#F4F5F1;}
+  .ledger-row .name{font-weight:600; font-size:14px;}
+  .ledger-row .name .state-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    padding:1px 5px;
+    border-radius:2px;
+    margin-right:6px;
+    color:#fff;
+  }
+  .state-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    padding:2px 7px;
+    border-radius:3px;
+    margin-right:6px;
+    color:#fff;
+    vertical-align:middle;
+    letter-spacing:.03em;
+  }
+  .tag-nc{background:var(--nc);}
+  .tag-tn{background:var(--tn);}
+  .tag-va{background:var(--va);}
+  .bar-track{
+    height:18px;
+    background:#EDEEE9;
+    border-radius:2px;
+    overflow:hidden;
+    display:flex;
+  }
+  .bar-seg{height:100%;}
+  .seg-income{background:var(--rust);}
+  .seg-prop{background:var(--brass);}
+  .seg-price-nc{background:var(--nc);}
+  .seg-price-tn{background:var(--tn);}
+  .seg-price-va{background:var(--va);}
+  .place-card.va{border-top-color:var(--va);}
+  .compare3-card.va .c3-head{background:var(--va);}
+  .hero-stat .num .tone-va{color:#C9A8E0;}
+  .home-badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:3px 8px;
+    border-radius:2px;
+    background:var(--va);
+    color:#fff;
+    margin-bottom:6px;
+  }
+  .ledger-row .total{
+    font-family:'IBM Plex Mono',monospace;
+    text-align:right;
+    font-weight:600;
+    font-size:14px;
+  }
+  .legend-line{display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5b6359;margin:14px 0 22px;}
+  .legend-line span{display:flex;align-items:center;gap:6px;}
+  .legend-line i{width:10px;height:10px;display:inline-block;border-radius:2px;}
+
+  /* REFERENCE CARDS */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:8px;}
+  .place-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:18px;
+    background:var(--card);
+    border-top:3px solid var(--nc);
+  }
+  .place-card.tn{border-top-color:var(--tn);}
+  .place-card.highlight{
+    animation:pulseHighlight 1.6s ease-out;
+  }
+  @keyframes pulseHighlight{
+    0%{box-shadow:0 0 0 4px var(--brass); }
+    100%{box-shadow:0 0 0 0 transparent;}
+  }
+  .place-card h4{font-family:'Source Serif 4',serif;font-size:18px;margin:0 0 4px;}
+  .place-card .meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b6359;margin-bottom:10px;}
+  .place-card p{font-size:13.5px;margin:8px 0 0;color:#3a4038;}
+  .place-card .stat-line{display:flex;justify-content:space-between;font-size:13px;margin-top:6px;}
+  .place-card .stat-line .v{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .hosp-badge{
+    display:inline-block;
+    margin-top:10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:2px;
+  }
+  .hosp-strong{background:#E3EFE6; color:var(--ledger);}
+  .hosp-mid{background:#F3EBD9; color:var(--brass);}
+  .hosp-weak{background:#F4E4DD; color:var(--rust);}
+  .risk-low{background:#E3EFE6; color:var(--ledger);}
+  .risk-moderate{background:#F3EBD9; color:var(--brass);}
+  .risk-elevated{background:#F4E4DD; color:var(--rust);}
+  .hosp-badge.clickable{
+    cursor:pointer;
+    text-decoration:underline dotted;
+    transition:opacity .15s;
+  }
+  .hosp-badge.clickable:hover{opacity:.7;}
+  .hosp-badge.clickable::after{content:" \2197";}
+  .badge-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .place-card .extra-stat{font-size:13px; margin-top:6px; color:#3a4038;}
+
+  /* REFERENCE FILTERS */
+  .ref-filters{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:18px;}
+  .ref-filters select{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--card);
+    color:var(--ink);
+  }
+
+  /* 3-CITY COMPARISON */
+  .compare3-wrap{
+    margin-top:6px;
+    margin-bottom:32px;
+    padding:20px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    border-top:3px solid var(--ledger);
+  }
+  .compare3-selects{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    align-items:flex-end;
+  }
+  .compare3-selects .field{
+    flex:1;
+    min-width:140px;
+    margin-bottom:0;
+  }
+  .compare3-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media(max-width:680px){
+    .compare3-grid{grid-template-columns:1fr;}
+  }
+  .compare3-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .compare3-card .c3-head{
+    padding:12px 14px;
+    color:#fff;
+    font-family:'Source Serif 4',serif;
+    font-size:15px;
+    font-weight:700;
+  }
+  .compare3-card.nc .c3-head{background:var(--nc);}
+  .compare3-card.tn .c3-head{background:var(--tn);}
+  .compare3-card .c3-body{padding:12px 14px; background:#fff;}
+  .c3-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    padding:5px 0;
+    border-bottom:1px solid var(--line);
+    gap:8px;
+  }
+  .c3-row:last-child{border-bottom:none;}
+  .c3-row .c3-label{color:#5b6359; flex:1;}
+  .c3-row .c3-val{font-family:'IBM Plex Mono',monospace; font-weight:600; text-align:right; flex-shrink:0;}
+  .c3-badges{display:flex; flex-wrap:wrap; gap:4px; padding:10px 14px 12px; background:#fff; border-top:1px solid var(--line);}
+  .compare3-empty{
+    color:#9aa093;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    text-align:center;
+    padding:20px;
+    grid-column:1/-1;
+  }
+
+  /* SCORECARD */
+  #scorecardTable th{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#5b6359;
+    padding:8px 10px;
+    text-align:left;
+    border-bottom:2px solid var(--ledger);
+    white-space:nowrap;
+    background:#fff;
+    position:sticky;
+    top:0;
+  }
+  #scorecardTable td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  #scorecardTable tr:hover td{background:#F8F9F6;}
+  #scorecardTable tr.home-row td{background:#F4F0F9;}
+  .sc-loc{font-weight:600;font-size:13px;white-space:nowrap;}
+  .sc-tax{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
+  .sc-tax.tax-high{color:var(--rust);}
+  .sc-tax.tax-mid{color:var(--brass);}
+  .sc-tax.tax-low{color:var(--ledger);}
+  .sc-badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    padding:2px 6px;
+    border-radius:2px;
+    white-space:nowrap;
+  }
+  .summary-para{
+    font-size:14.5px;
+    line-height:1.65;
+    margin-bottom:14px;
+    padding:14px 18px;
+    border-left:3px solid var(--line);
+    background:#FAFAF8;
+    border-radius:0 3px 3px 0;
+  }
+  .summary-para strong{color:var(--ink);}
+  .summary-para.highlight{border-left-color:var(--ledger);}
+  .summary-para.warn{border-left-color:var(--brass);}
+
+  /* CHECKLIST */
+  .checklist-progress{
+    height:8px;
+    background:#EDEEE9;
+    border-radius:4px;
+    overflow:hidden;
+    margin:6px 0 24px;
+  }
+  .checklist-progress-bar{height:100%; background:var(--ledger); transition:width .3s;}
+  .checklist-section{margin-bottom:28px;}
+  .checklist-section h3{
+    font-family:'Source Serif 4',serif;
+    font-size:17px;
+    margin-bottom:4px;
+  }
+  .checklist-section .section-sub{font-size:12.5px; color:#6b7264; margin-bottom:10px;}
+  .checklist-item{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .checklist-item input[type=checkbox]{
+    margin-top:3px;
+    width:16px; height:16px;
+    accent-color:var(--ledger);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .checklist-item label{font-size:14px; cursor:pointer;}
+  .checklist-item.checked label{color:#9aa093; text-decoration:line-through;}
+  .checklist-reset{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#8a9183;
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+  }
+
+  /* REJECTED STATES */
+  .place-card.rejected{
+    border-top-color:#9aa193;
+    background:#F1F2EE;
+    opacity:.92;
+  }
+  .place-card.rejected h4{color:#5b6359;}
+  .rejected-badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:3px 8px;
+    border-radius:2px;
+    background:#E2E4DC;
+    color:#6b7264;
+    margin-bottom:8px;
+  }
+
+  /* MAP */
+  #map{
+    height:520px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    margin-top:8px;
+  }
+  .map-filters{display:flex;gap:8px;margin-bottom:14px;}
+  .map-filters button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:8px 14px;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:3px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .map-filters button.active{background:var(--ledger); color:#fff; border-color:var(--ledger);}
+  .leaflet-popup-content{font-family:'IBM Plex Sans',sans-serif; font-size:13px;}
+  .leaflet-popup-content b{font-family:'Source Serif 4',serif; font-size:15px;}
+
+  /* HOMES TAB */
+  .homes-hero{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--ledger);border-radius:4px;}
+  .homes-hero-stat .num{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--ink);}
+  .homes-hero-stat .lab{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6b7264;margin-top:3px;}
+  .homes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:8px;}
+  .home-card{border:1px solid var(--line);border-radius:4px;background:#fff;border-top:3px solid var(--ledger);overflow:hidden;}
+  .home-card.archived{border-top-color:#9aa193;opacity:.75;}
+  .home-card-head{padding:14px 16px 10px;}
+  .home-card-addr{font-family:'Source Serif 4',serif;font-size:15px;font-weight:700;margin:0 0 2px;}
+  .home-card-city{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b6359;}
+  .home-card-price{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--ledger);margin:8px 0 4px;}
+  .home-card-body{padding:0 16px 14px;}
+  .home-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0;}
+  .home-stat{font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .home-stat .v{font-weight:600;}
+  .home-stat .k{color:#6b7264;}
+  .home-divider{height:1px;background:var(--line);margin:10px 0;}
+  .home-cost-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f0f1ec;}
+  .home-cost-row .ck{color:#5b6359;}
+  .home-cost-row .cv{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .home-cost-row.total-row{border-top:2px solid var(--line);border-bottom:none;margin-top:6px;padding-top:8px;}
+  .home-cost-row.total-row .cv{color:var(--ledger);font-size:14px;}
+  .home-badges{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 8px;}
+  .home-links{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .home-link-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:5px 10px;border-radius:3px;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--card);}
+  .home-link-btn:hover{background:var(--ledger);color:#fff;border-color:var(--ledger);}
+  .home-notes{font-size:12.5px;color:#5b6359;background:#F8F9F6;padding:8px 10px;border-radius:3px;margin-top:8px;border-left:2px solid var(--line);}
+  .status-badge-active{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:2px;background:#E3EFE6;color:var(--ledger);margin-bottom:6px;}
+  .status-badge-archive{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:2px;background:#EDEEE9;color:#6b7264;margin-bottom:6px;}
+  .homes-filter-bar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    padding:14px 16px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    margin-bottom:16px;
+  }
+  .homes-filter-bar .field{flex:1;min-width:140px;margin-bottom:0;}
+  .homes-filter-bar label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#5b6359;
+    margin-bottom:5px;
+  }
+  .homes-filter-bar select{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .homes-filter-clear{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#9aa193;
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+    align-self:flex-end;
+    margin-bottom:2px;
+  }
+  .homes-filter-count{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:#6b7264;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .homes-view-toggle{
+    display:flex;
+    gap:2px;
+    flex-shrink:0;
+  }
+  .homes-view-toggle button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:4px 10px;
+    border:1px solid var(--line);
+    background:var(--card);
+    cursor:pointer;
+    color:#5b6359;
+  }
+  .homes-view-toggle button:first-child{border-radius:3px 0 0 3px;}
+  .homes-view-toggle button:last-child{border-radius:0 3px 3px 0;}
+  .homes-view-toggle button.active{background:var(--ledger);color:#fff;border-color:var(--ledger);}
+
+  /* HOMES TABLE VIEW */
+  .homes-table-wrap{overflow-x:auto;margin-top:4px;}
+  .homes-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    white-space:nowrap;
+  }
+  .homes-table th{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#5b6359;
+    padding:8px 12px;
+    text-align:left;
+    border-bottom:2px solid var(--ledger);
+    background:#fff;
+    position:sticky;
+    top:0;
+    white-space:nowrap;
+  }
+  .homes-table td{
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  .homes-table tr:hover td{background:#F8F9F6;}
+  .homes-table .td-notes{
+    white-space:normal;
+    max-width:240px;
+    font-size:12px;
+    color:#5b6359;
+    line-height:1.4;
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    cursor:pointer;
+  }
+  .homes-table .td-notes.expanded{
+    display:block;
+    -webkit-line-clamp:unset;
+    overflow:visible;
+    background:#F4F5F1;
+    padding:4px 6px;
+    border-radius:2px;
+  }
+  .homes-table .td-notes:empty{cursor:default;}
+
+  /* VISITED BADGE */
+  .visited-badge{
+    display:inline-block;
+    font-size:10px;
+    font-weight:700;
+    color:var(--ledger);
+    background:#E3EFE6;
+    padding:1px 5px;
+    border-radius:2px;
+    margin-left:5px;
+    vertical-align:middle;
+    cursor:pointer;
+    white-space:nowrap;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.03em;
+    transition:padding .15s;
+  }
+  .visited-badge .vdate{
+    display:none;
+    font-weight:400;
+    margin-left:3px;
+  }
+  .visited-badge:hover .vdate,
+  .visited-badge.show .vdate{display:inline;}
+
+  .home-card.highlight{animation:pulseHighlight 1.6s ease-out;}
+  .tour-card.highlight{animation:pulseHighlight 1.6s ease-out;}
+  .jump-card-btn{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:#8a9183;
+    background:none;
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:1px 4px;
+    margin-left:5px;
+    cursor:pointer;
+    vertical-align:middle;
+    line-height:1.4;
+  }
+  .jump-card-btn:hover{background:var(--ledger);color:#fff;border-color:var(--ledger);}
+  .homes-table .td-addr{font-weight:600;}
+  .homes-table .td-addr .td-community{font-weight:400;font-size:11px;color:#8a9183;display:block;}
+  .homes-table .td-wc-yes{color:var(--ledger);font-weight:600;}
+  .homes-table .td-wc-no{color:var(--rust);font-weight:600;}
+  .homes-table .td-link a{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ledger);
+    text-decoration:none;
+    border:1px solid var(--ledger);
+    padding:2px 6px;
+    border-radius:2px;
+  }
+  .homes-table .td-link a:hover{background:var(--ledger);color:#fff;}
+  .homes-compare-selects{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+  .homes-compare-selects .field{flex:1;min-width:160px;margin-bottom:0;}
+  .homes-compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:680px){.homes-compare-grid{grid-template-columns:1fr;}}
+  .homes-empty{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8a9183;padding:32px;text-align:center;border:1px dashed var(--line);border-radius:4px;}
+  .homes-loading{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5b6359;padding:24px;text-align:center;}
+  .homes-error{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--rust);padding:16px;background:#FDF3F1;border:1px solid #F4E4DD;border-radius:4px;}
+
+  /* TOUR NOTES TAB */
+  .tour-filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:4px;margin-bottom:12px;}
+  .tour-filter-bar .field{flex:1;min-width:180px;margin-bottom:0;}
+  .tour-view-toggle{display:flex;gap:2px;align-self:flex-end;flex-shrink:0;}
+  .tour-view-toggle button{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;border:1px solid var(--line);background:var(--card);cursor:pointer;color:#5b6359;}
+  .tour-view-toggle button:first-child{border-radius:3px 0 0 3px;}
+  .tour-view-toggle button:last-child{border-radius:0 3px 3px 0;}
+  .tour-view-toggle button.active{background:var(--ledger);color:#fff;border-color:var(--ledger);}
+  .tour-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+  .tour-card{border:1px solid var(--line);border-radius:4px;background:#fff;border-top:4px solid var(--ledger);}
+  .tour-card.rejected{border-top-color:var(--rust);}
+  .tour-card.pending{border-top-color:var(--brass);}
+  .tour-card-head{padding:14px 16px 10px;background:var(--card);border-bottom:1px solid var(--line);}
+  .tour-card-home{font-family:'Source Serif 4',serif;font-size:15px;font-weight:700;margin:0 0 3px;}
+  .tour-card-meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b6359;margin-bottom:6px;}
+  .tour-deal-flag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--rust);font-weight:700;margin-top:4px;}
+  .tour-card-body{padding:8px 16px 14px;}
+  .tour-sec{margin-top:10px;}
+  .tour-sec-label{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#9aa193;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--line);}
+  .tour-field{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:3px 0;font-size:13px;border-bottom:1px solid #f0f1ec;}
+  .tour-field .tf-label{color:#5b6359;flex-shrink:0;font-size:12px;}
+  .tf-yes{color:var(--ledger);font-weight:700;}
+  .tf-no{color:var(--rust);font-weight:700;}
+  .tf-neg{color:var(--rust);font-weight:700;}
+  .tour-notes-block{font-size:12.5px;color:#3a4038;font-style:italic;line-height:1.45;margin-top:3px;padding:5px 8px;background:#F8F9F6;border-radius:2px;}
+  .tour-decision-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:2px;}
+  .tdb-active{background:#E3EFE6;color:var(--ledger);}
+  .tdb-pending{background:#F3EBD9;color:var(--brass);}
+  .tdb-rejected{background:#F4E4DD;color:var(--rust);}
+  /* Compare table */
+  .tour-compare-selects{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;}
+  .tour-compare-selects .field{flex:1;min-width:200px;margin-bottom:0;}
+  .tour-compare-wrap{overflow-x:auto;margin-top:4px;}
+  .tc-table{border-collapse:collapse;font-size:13px;min-width:100%;}
+  .tc-table th{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;border-bottom:2px solid var(--ledger);background:#fff;text-align:left;position:sticky;top:0;white-space:nowrap;min-width:220px;}
+  .tc-table th:first-child{min-width:160px;position:sticky;left:0;z-index:2;}
+  .tc-table td{padding:7px 14px;border-bottom:1px solid var(--line);vertical-align:top;min-width:220px;}
+  .tc-table tr:hover td{background:#F8F9F6;}
+  .tc-label-col{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5b6359;position:sticky;left:0;background:#fff;white-space:nowrap;}
+  .tc-section-row td{background:#F4F5F1 !important;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#6b7264;padding:5px 14px;font-weight:700;}
+  .tc-yes{color:var(--ledger);font-weight:700;}
+  .tc-no{color:var(--rust);font-weight:700;}
+  .tc-neg{color:var(--rust);font-weight:700;}
+  .tc-good{color:var(--ledger);font-weight:700;}
+
+  /* REQUIREMENTS TAB */
+  .req-section{margin-bottom:28px;}
+  .req-section-title{font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--ledger);}
+  .req-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f0f1ec;font-size:13.5px;}
+  .req-item .req-text{flex:1;color:var(--ink);}
+  .req-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
+  .req-tour{background:#E3EFE6;color:var(--ledger);}
+  .req-listings{background:#F3EBD9;color:var(--brass);}
+  .req-untracked{background:#F4E4DD;color:var(--rust);}
+  .req-field-hint{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9aa193;margin-top:2px;}
+  .req-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5b6359;}
+  .req-legend span{display:flex;align-items:center;gap:5px;}
+  .ruled-out-item{padding:8px 0;border-bottom:1px solid #f0f1ec;font-size:13px;}
+  .ruled-out-item .ro-name{font-weight:600;color:var(--ink);}
+  .ruled-out-item .ro-reason{color:#6b7264;font-size:12px;margin-top:2px;}
+  .req-candidates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px;}
+  .req-candidate-card{border:1px solid var(--line);border-radius:4px;padding:14px;background:var(--card);border-left:3px solid var(--ledger);}
+  .req-candidate-card.pending{border-left-color:var(--brass);}
+  .req-candidate-name{font-family:'Source Serif 4',serif;font-size:15px;font-weight:700;margin:0 0 3px;}
+  .req-candidate-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5b6359;margin-bottom:8px;}
+  .req-candidate-price{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:var(--ledger);}
+  .req-candidate-open{font-size:12px;color:#6b7264;margin-top:6px;font-style:italic;}
+  .req-candidate-link{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ledger);text-decoration:none;border:1px solid var(--ledger);padding:2px 7px;border-radius:2px;margin-top:8px;display:inline-block;}
+
+  footer{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:#8a9183;
+    padding:30px 24px;
+  }
+  .note{
+    font-size:12.5px;
+    color:#6b7264;
+    background:#F4F5F1;
+    border-left:3px solid var(--brass);
+    padding:10px 14px;
+    margin-top:18px;
+  }
+  .winner-banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    border-radius:4px;
+    margin-top:8px;
+    font-size:14px;
+    flex-wrap:wrap;
+  }
+  .winner-banner.tone-nc{background:#EAF0F6; border-left:4px solid var(--nc);}
+  .winner-banner.tone-tn{background:#F6EFE6; border-left:4px solid var(--tn);}
+
+  /* PROPERTY TAX MODE TOGGLE */
+  .toggle-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .toggle-wrap .toggle-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#5b6359;
+    white-space:nowrap;
+  }
+  .toggle-track{
+    position:relative;
+    width:230px;
+    height:32px;
+    background:#EDEEE9;
+    border:1px solid var(--line);
+    border-radius:4px;
+    display:flex;
+    cursor:pointer;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .toggle-opt{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:#5b6359;
+    z-index:1;
+    transition:color .2s;
+    user-select:none;
+    padding:0 4px;
+    text-align:center;
+  }
+  .toggle-opt.selected{color:#fff; font-weight:600;}
+  .toggle-slider{
+    position:absolute;
+    top:2px; bottom:2px;
+    width:calc(50% - 2px);
+    background:var(--ledger);
+    border-radius:3px;
+    transition:left .2s ease;
+    left:2px;
+  }
+  .toggle-track.mode-market .toggle-slider{left:calc(50%);}
+  .toggle-mode-note{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:#6b7264;
+    padding:6px 10px;
+    background:#F4F5F1;
+    border-radius:3px;
+    border-left:2px solid var(--brass);
+  }
+  .winner-banner .winner-amount{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:16px;
+  }
+  .winner-banner .winner-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#fff;
+    padding:3px 8px;
+    border-radius:2px;
+    flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">NC &middot; TN &middot; VA &middot; Retirement Relocation Field Notes &middot; Current: Ashburn, VA &middot; <span id="versionBadge"></span></div>
+    <h1 id="heroTitle">Where the money goes, town by town.</h1>
+    <p class="lede" id="heroLede">A working comparison of North Carolina and Tennessee for retirement — tax exposure, property cost, and proximity to care. Numbers update live as you adjust the figures below.</p>
+    <div class="hero-stat" id="heroStats">
+      <div><div class="num mono" id="heroStatA">—</div><div class="lab" id="heroLabelA">Annual state-tax gap, top pick</div></div>
+      <div><div class="num mono" id="heroStatB">0%</div><div class="lab" id="heroLabelB">TN state income tax, always</div></div>
+      <div><div class="num mono" id="heroStatC">3.99%</div><div class="lab" id="heroLabelC">NC flat rate (2026)</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="tabs">
+    <button data-tab="calc" class="active">Calculator</button>
+    <button data-tab="ledger">Annual Tax Ranking</button>
+    <button data-tab="homeprices">Home Prices</button>
+    <button data-tab="map">Map</button>
+    <button data-tab="reference">Reference Notes</button>
+    <button data-tab="requirements">📌 Requirements</button>
+    <button data-tab="summary">Summary</button>
+    <button data-tab="homes">🏠 Home Listings</button>
+    <button data-tab="tour">📋 Tour Notes</button>
+    <button data-tab="checklist">Planning Checklist</button>
+    <button data-tab="politics">Politics</button>
+    <button data-tab="rejected">Considered &amp; Rejected</button>
+    <button data-tab="diversity">Culture &amp; Diversity</button>
+  </nav>
+
+  <!-- CALCULATOR -->
+  <section class="panel active" id="calc">
+    <h2 class="section-title">Run your numbers</h2>
+    <div class="calc-grid">
+      <div>
+        <div class="field">
+          <label>Filing status</label>
+          <select id="filing">
+            <option value="single">Single</option>
+            <option value="mfj">Married filing jointly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Annual Social Security</label>
+          <input type="number" id="ss" value="40000" step="1000">
+        </div>
+        <div class="field">
+          <label>Annual 401k / deferred comp withdrawal</label>
+          <input type="number" id="dist" value="60000" step="1000">
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <div class="toggle-wrap">
+            <span class="toggle-label">Property tax based on</span>
+            <div class="toggle-track" id="propTaxToggle">
+              <div class="toggle-slider"></div>
+              <div class="toggle-opt selected" id="toggleOptCustom">My value</div>
+              <div class="toggle-opt" id="toggleOptMarket">Market price</div>
+            </div>
+          </div>
+          <div id="homevalWrap">
+            <label class="field" style="display:block;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5b6359;">Home value (your estimate)</span>
+              <input type="number" id="homeval" value="500000" step="10000" style="width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:15px;background:var(--card);">
+            </label>
+          </div>
+          <div id="homevalMarketNote" style="display:none;" class="toggle-mode-note">
+            Using each location's typical median market price — figures will differ per town.
+          </div>
+        </div>
+        <div class="field">
+          <label>Annual spending subject to sales tax (optional)</label>
+          <input type="number" id="spend" value="40000" step="1000">
+        </div>
+        <div class="field">
+          <label>Compare these two directly</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="compareA" style="flex:1;min-width:130px;"></select>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b6359;">vs</span>
+            <select id="compareB" style="flex:1;min-width:130px;"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">NC fully exempts Social Security; 401k/IRA/deferred comp withdrawals are taxed at the flat 3.99% rate above the standard deduction ($12,750 single / $25,500 MFJ). Tennessee taxes none of it. <b>Virginia</b> also exempts SS, but taxes 401k/deferred comp at graduated rates (2%–5.75%), with a $12,000/person age deduction at 65+ that phases out above $50k/$75k income. <b>Property tax mode:</b> "My value" applies a single home price across all locations; "Market price" uses each town's actual median. Sales-tax figure is illustrative only.</div>
+
+    <div id="winnerBanner"></div>
+
+    <h3 class="sub">Head-to-head</h3>
+    <div class="calc-grid" id="headToHead"></div>
+  </section>
+
+  <!-- LEDGER -->
+  <section class="panel" id="ledger">
+    <h2 class="section-title">Annual tax ranking — all locations</h2>
+    <div class="map-filters">
+      <button data-ledger-filter="all" class="active">All locations</button>
+      <button data-ledger-filter="NC">North Carolina only</button>
+      <button data-ledger-filter="TN">Tennessee only</button>
+      <button data-ledger-filter="VA">Virginia only</button>
+    </div>
+    <div class="legend-line">
+      <span><i style="background:var(--rust)"></i> State income tax</span>
+      <span><i style="background:var(--brass)"></i> Property tax</span>
+    </div>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#8a9183;margin:-6px 0 14px;">Click any row to jump to its reference notes.</p>
+    <div id="ledgerRows"></div>
+  </section>
+
+  <!-- HOME PRICES -->
+  <section class="panel" id="homeprices">
+    <h2 class="section-title">All locations, ranked by median home price</h2>
+    <div class="map-filters">
+      <button data-price-filter="all" class="active">All locations</button>
+      <button data-price-filter="NC">North Carolina only</button>
+      <button data-price-filter="TN">Tennessee only</button>
+      <button data-price-filter="VA">Virginia only</button>
+    </div>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#8a9183;margin:-6px 0 14px;">Click any row to jump to its reference notes. Prices are typical market medians as of mid-2026 — verify with a local agent before deciding.</p>
+    <div id="homePriceRows"></div>
+  </section>
+
+  <!-- MAP -->
+  <section class="panel" id="map-panel">
+    <h2 class="section-title">Where they sit, relative to each other</h2>
+    <div class="map-filters">
+      <button data-filter="all" class="active">All locations</button>
+      <button data-filter="NC">North Carolina only</button>
+      <button data-filter="TN">Tennessee only</button>
+      <button data-filter="VA">Virginia only</button>
+    </div>
+    <div id="map"></div>
+    <div class="legend-line" style="margin-top:14px;">
+      <span><i style="background:var(--nc)"></i> North Carolina</span>
+      <span><i style="background:var(--tn)"></i> Tennessee</span>
+      <span><i style="background:var(--va)"></i> Virginia (current)</span>
+    </div>
+  </section>
+
+  <!-- REFERENCE -->
+  <section class="panel" id="reference">
+    <h2 class="section-title">Reference notes</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Approximate figures compiled from county assessor sites, SmartAsset, FBI/local crime data, and local listings as of mid-2026. Verify exact rates with the relevant county assessor before deciding.</p>
+
+    <!-- 3-city comparison -->
+    <div class="compare3-wrap">
+      <h3 class="sub" style="margin-top:0;">Side-by-side comparison</h3>
+      <div class="compare3-selects">
+        <div class="field">
+          <label>City 1</label>
+          <select id="c3selA"></select>
+        </div>
+        <div class="field">
+          <label>City 2</label>
+          <select id="c3selB"></select>
+        </div>
+        <div class="field">
+          <label>City 3</label>
+          <select id="c3selC"></select>
+        </div>
+      </div>
+      <div class="compare3-grid" id="compare3Grid"></div>
+    </div>
+
+    <div class="ref-filters">
+      <div class="map-filters" id="refStateFilters">
+        <button data-ref-state="all" class="active">All states</button>
+        <button data-ref-state="NC">North Carolina</button>
+        <button data-ref-state="TN">Tennessee</button>
+        <button data-ref-state="VA">Virginia</button>
+      </div>
+      <select id="refCountyFilter">
+        <option value="all">All counties</option>
+      </select>
+    </div>
+    <div class="card-grid" id="refCards"></div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="panel" id="checklist">
+    <h2 class="section-title">Retirement relocation checklist</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Checked items are saved in this browser only — they won't sync across devices, but they'll still be here next time you open this page on this computer. <button class="checklist-reset" id="checklistReset">Reset all</button></p>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="checklistProgressBar" style="width:0%"></div></div>
+    <div id="checklistContainer"></div>
+  </section>
+
+  <!-- POLITICS -->
+  <section class="panel" id="politics">
+    <h2 class="section-title">Political atmosphere, by state</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Factual snapshot of current party control as of the 2026 legislative session — included for context, not as a recommendation either direction. Statewide control doesn't always match local-level voting patterns within a state (noted per state below).</p>
+    <div class="card-grid" id="politicsCards"></div>
+    <div class="note">This reflects current control only — legislative majorities and governorships are subject to change in future elections (TN and FL both have gubernatorial elections in November 2026). Worth re-checking closer to any actual decision date.</div>
+  </section>
+
+  <!-- REJECTED -->
+  <section class="panel" id="rejected">
+    <h2 class="section-title">States considered &amp; rejected</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">A decision log, not a comparison — these are the other zero-income-tax states that came up and why they didn't make the cut. Kept here so the reasoning doesn't have to be re-derived later.</p>
+    <div class="card-grid" id="rejectedCards"></div>
+  </section>
+
+  <!-- DIVERSITY -->
+  <section class="panel" id="diversity">
+    <h2 class="section-title">Culture &amp; diversity</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Ethnic grocery access and overall community diversity, by location. Ratings are relative to each other in this list, not a national scale.</p>
+
+    <div class="note" style="margin-top:0;">
+      <strong>The standout: Nolensville Pike, Nashville.</strong> Antioch sits directly on this corridor — home to the largest Kurdish population in the U.S., plus dense Middle Eastern, Southeast Asian, West African, and Latin American markets and restaurants packed into a few miles. It's a real culinary draw, not just a footnote, and it's the single most diverse stretch of anything in this comparison, NC included.
+    </div>
+    <div class="note">
+      <strong>Charlotte &amp; Raleigh both have strong built-in diversity.</strong> Charlotte is NC's most ethnically diverse city, with 17% of residents foreign-born. Raleigh/the Triangle has a fast-growing Asian population with its own international grocery scene (H Mart, A&C, Fresh International Market). Both are diverse in-city, no special trip required.
+    </div>
+    <div class="note">
+      <strong>The Williamson County cluster is the weak point.</strong> Franklin, Brentwood, Thompson's Station, and Spring Hill all have mainstream grocery only — Kroger, Whole Foods, Trader Joe's. Real ethnic shopping means a 25-35 minute drive to the Nolensville Pike corridor. This tracks with why those towns are also the safest and most homogeneous.
+    </div>
+
+    <h3 class="sub">By location</h3>
+    <div class="card-grid" id="diversityCards"></div>
+  </section>
+
+  <!-- REQUIREMENTS -->
+  <section class="panel" id="requirements">
+    <h2 class="section-title">Requirements &amp; Candidates</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Your criteria for the new home search, with coverage indicators showing where each requirement is tracked in the tool.</p>
+    <div class="req-legend">
+      <span><span class="req-badge req-tour">Tour Notes</span> Captured in the tour form</span>
+      <span><span class="req-badge req-listings">Listings</span> Tracked in Home Listings</span>
+      <span><span class="req-badge req-untracked">Not captured</span> Confirm manually</span>
+    </div>
+    <div id="reqContent"></div>
+  </section>
+
+  <!-- TOUR NOTES -->
+  <section class="panel" id="tour">
+    <h2 class="section-title">Tour Notes</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Pulled live from your Google Form submissions — fill in the form during or right after each tour. Switch between Scorecard (one home at a time) and Compare (up to 3 homes side by side).</p>
+    <div id="tourStatus"></div>
+    <div class="tour-filter-bar" id="tourFilterBar" style="display:none;">
+      <div class="field">
+        <label>Filter by home</label>
+        <select id="tcHomeFilter" onchange="applyTourView()"><option value="">All homes</option></select>
+      </div>
+      <div class="field">
+        <label>Decision</label>
+        <select id="tcDecisionFilter" onchange="applyTourView()">
+          <option value="">All decisions</option>
+          <option value="Active">Active</option>
+          <option value="Pending">Pending</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="tour-view-toggle">
+        <button id="tvScorecard" class="active" onclick="setTourView('scorecard')">⊞ Scorecard</button>
+        <button id="tvTable" onclick="setTourView('table')">☰ Table</button>
+        <button id="tvCompare" onclick="setTourView('compare')">⇔ Compare</button>
+      </div>
+    </div>
+    <div id="tourCompareSelects" style="display:none;" class="tour-compare-selects">
+      <div class="field"><label>Home 1</label><select id="tcSelA" onchange="applyTourView()"><option value="">— none —</option></select></div>
+      <div class="field"><label>Home 2</label><select id="tcSelB" onchange="applyTourView()"><option value="">— none —</option></select></div>
+      <div class="field"><label>Home 3</label><select id="tcSelC" onchange="applyTourView()"><option value="">— none —</option></select></div>
+    </div>
+    <div id="tourContent"></div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="panel" id="summary">
+    <h2 class="section-title">Summary</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Dynamically generated from current data and your calculator inputs. Run the Calculator tab first to populate the tax estimates.</p>
+    <div id="summaryNarrative"></div>
+    <h3 class="sub" style="margin-top:32px;">Full scorecard</h3>
+    <p style="font-size:13px;color:#6b7264;margin:-8px 0 14px;">All locations across every dimension tracked in this tool. Scroll right on small screens.</p>
+    <div style="overflow-x:auto;">
+      <table id="scorecardTable" style="width:100%;border-collapse:collapse;font-size:13px;"></table>
+    </div>
+  </section>
+
+  <!-- HOMES -->
+  <section class="panel" id="homes">
+    <h2 class="section-title">Home Listings</h2>
+    <p style="color:#5b6359;font-size:14px;margin-top:-6px;">Pulled live from Google Sheets — add listings there and refresh this tab to see updates. Location badges and tax estimates are computed automatically from the tool's location data.</p>
+    <div id="homesStatus"></div>
+    <div id="homesHero" class="homes-hero" style="display:none;"></div>
+
+    <div class="homes-filter-bar" id="homesFilterBar" style="display:none;">
+      <div class="field">
+        <label>City</label>
+        <select id="hfCity" onchange="applyHomesFilter()"><option value="">All cities</option></select>
+      </div>
+      <div class="field">
+        <label>Builder</label>
+        <select id="hfBuilder" onchange="applyHomesFilter()"><option value="">All builders</option></select>
+      </div>
+      <div class="field" style="flex:0;min-width:160px;">
+        <label>Status</label>
+        <select id="hfStatus" onchange="applyHomesFilter()">
+          <option value="active">Active only</option>
+          <option value="pending">Pending only</option>
+          <option value="active_pending">Active + Pending</option>
+          <option value="all">All statuses</option>
+          <option value="rejected">Rejected only</option>
+          <option value="archived">Archived only</option>
+        </select>
+      </div>
+      <button class="homes-filter-clear" id="hfClear" onclick="hfCity.value='';hfBuilder.value='';hfStatus.value='active';applyHomesFilter();">Clear</button>
+    </div>
+    <div class="homes-filter-count" id="homesFilterCount">
+      <span id="homesFilterCountText"></span>
+      <div class="homes-view-toggle" id="homesViewToggle" style="display:none;">
+        <button id="hvCards" class="active" onclick="setHomesView('cards')">⊞ Cards</button>
+        <button id="hvTable" onclick="setHomesView('table')">☰ Table</button>
+      </div>
+    </div>
+    <div id="homesListings"></div>
+
+    <div id="homesCompareSection" style="display:none;">
+      <h3 class="sub" style="margin-top:32px;">Side-by-side comparison</h3>
+      <div class="homes-compare-selects">
+        <div class="field"><label>Home 1</label><select id="hcSelA"></select></div>
+        <div class="field"><label>Home 2</label><select id="hcSelB"></select></div>
+        <div class="field"><label>Home 3</label><select id="hcSelC"></select></div>
+      </div>
+      <div class="homes-compare-grid" id="homesCompareGrid"></div>
+    </div>
+  </section>
+</div>
+
+<footer>Compiled for personal planning use &middot; not tax or financial advice &middot; verify figures with a CPA before deciding &middot; <span id="footerVersion"></span></footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── APP CONFIG ────────────────────────────────────────────────────────────────
+const APP_VERSION = 'v3.9';
+// Paste your Google Apps Script Web App URL below after deploying the script.
+// Extensions → Apps Script → Deploy → New deployment → Web App → Anyone → Deploy
+const HOMES_API_URL = 'https://script.google.com/macros/s/AKfycbxUozNZNEsxz0urW_OarJ8mHySlxloE4cUw1RNpGbPsjNT1479AbXF4Pss_OjgDBeyM/exec';
+// ──────────────────────────────────────────────────────────────────────────────
+
+const STD_DEDUCTION = { single: 12750, mfj: 25500 };
+
+let lastIncomeGap = { amount: 0, state: null };
+let lastTotalGap = { amount: 0, state: null };
+let lastVAGap = { vaTotal: 0, bestReloc: null, saving: 0 };
+let lastResults = []; // stored for summary tab
+let currentTab = 'calc';
+
+// property tax mode: 'custom' (use entered home value) or 'market' (use each loc's typical price)
+// persists in localStorage until changed
+let propTaxMode = (function(){
+  try { return localStorage.getItem('propTaxMode') || 'custom'; } catch(e){ return 'custom'; }
+})();
+
+function savePropTaxMode(mode){
+  propTaxMode = mode;
+  try { localStorage.setItem('propTaxMode', mode); } catch(e){}
+}
+
+function syncToggleUI(){
+  const track = document.getElementById('propTaxToggle');
+  const optCustom = document.getElementById('toggleOptCustom');
+  const optMarket = document.getElementById('toggleOptMarket');
+  const homevalWrap = document.getElementById('homevalWrap');
+  const marketNote = document.getElementById('homevalMarketNote');
+  if (!track || !optCustom || !optMarket || !homevalWrap || !marketNote) return;
+  if (propTaxMode === 'market'){
+    track.classList.add('mode-market');
+    optCustom.classList.remove('selected');
+    optMarket.classList.add('selected');
+    homevalWrap.style.display = 'none';
+    marketNote.style.display = 'block';
+  } else {
+    track.classList.remove('mode-market');
+    optCustom.classList.add('selected');
+    optMarket.classList.remove('selected');
+    homevalWrap.style.display = '';
+    marketNote.style.display = 'none';
+  }
+}
+
+const TAB_META = {
+  calc: {
+    title: 'NC, TN & VA — Retirement Tax & Cost Comparison.',
+    lede: 'Run your numbers across all three states. Ashburn, VA is your current baseline — see what you\'d save by relocating at these inputs.',
+    stats: () => [
+      { val: gapStatHtml(lastIncomeGap),
+        winner: lastIncomeGap.state,
+        lab: 'Annual state income tax NC charges vs TN ($0) — the structural income-tax advantage of Tennessee' },
+      { val: lastVAGap.saving > 0 ? fmt(lastVAGap.saving) + '/yr' : (lastVAGap.saving < 0 ? fmt(Math.abs(lastVAGap.saving)) + '/yr more' : '—'),
+        winner: lastVAGap.saving > 0 && lastVAGap.bestReloc ? lastVAGap.bestReloc.state : null,
+        lab: lastVAGap.bestReloc
+          ? `Total annual tax (income + property) vs staying in Ashburn, VA — best pick: ${lastVAGap.bestReloc.name}, ${lastVAGap.bestReloc.state}`
+          : 'Total annual tax savings vs staying in Ashburn, VA' },
+      { val: gapStatHtml(lastTotalGap),
+        winner: lastTotalGap.state,
+        lab: 'Total annual gap between the lowest-cost NC and lowest-cost TN locations' },
+    ]
+  },
+  ledger: {
+    title: 'Annual tax ranking — all locations.',
+    lede: 'Every location ranked by combined income + property tax burden across NC, TN, and VA — click any row to jump straight to its full reference notes.',
+    stats: () => [
+      { val: LOCATIONS.length, lab: 'Locations tracked' },
+      { val: gapStatHtml(lastTotalGap),
+        winner: lastTotalGap.state,
+        lab: 'Annual total tax gap: lowest-cost NC vs lowest-cost TN location' },
+      { val: '3', lab: 'States compared (NC, TN, VA)' },
+    ]
+  },
+  homeprices: {
+    title: 'Home prices, cheapest to most expensive.',
+    lede: 'All locations ranked by typical median home price as of mid-2026 — NC (blue), TN (clay), VA (purple). Click any row to see full reference notes.',
+    stats: () => {
+      const sorted = [...LOCATIONS].sort((a,b) => a.home - b.home);
+      const cheapest = sorted[0];
+      const priciest = sorted[sorted.length - 1];
+      return [
+        { val: fmt(cheapest.home), lab: `Cheapest: ${cheapest.name}, ${cheapest.state}` },
+        { val: fmt(priciest.home), lab: `Priciest: ${priciest.name}, ${priciest.state}` },
+        { val: fmt(Math.round(LOCATIONS.reduce((s,l) => s + l.home, 0) / LOCATIONS.length)), lab: 'Average across all locations' },
+      ];
+    }
+  },
+  'map-panel': {
+    title: 'Where they sit, relative to each other.',
+    lede: 'The Tennessee towns cluster around Nashville; Charlotte and Raleigh sit roughly 2.5–3 hours further east. Filter by state to see either group on its own.',
+    stats: () => [
+      { val: LOCATIONS.length, lab: 'Locations mapped' },
+      { val: '~3 hrs', lab: 'NC cities to TN cluster' },
+      { val: '2', lab: 'States' },
+    ]
+  },
+  reference: {
+    title: 'Reference notes.',
+    lede: 'Property tax, healthcare access, crime, severe-weather risk, and Medigap cost for every location — filter by state or county below.',
+    stats: () => [
+      { val: LOCATIONS.length, lab: 'Locations covered' },
+      { val: '5', lab: 'Comparison dimensions' },
+      { val: 'Mid-2026', lab: 'Data compiled' },
+    ]
+  },
+  checklist: {
+    title: 'Planning checklist.',
+    lede: 'Seven categories covering tax/legal, healthcare, finances, the move itself, and family care coordination — checked items are saved on this device.',
+    stats: () => {
+      const state = loadChecklistState();
+      const total = CHECKLIST.reduce((sum, sec) => sum + sec.items.length, 0);
+      const checked = Object.values(state).filter(Boolean).length;
+      const pct = total ? Math.round((checked / total) * 100) : 0;
+      return [
+        { val: pct + '%', lab: 'Checklist complete' },
+        { val: checked + '/' + total, lab: 'Items checked' },
+        { val: CHECKLIST.length, lab: 'Categories' },
+      ];
+    }
+  },
+  politics: {
+    title: 'Political atmosphere, by state.',
+    lede: 'Current party control for North Carolina and Tennessee — included for context, not as a recommendation either direction.',
+    stats: () => [
+      { val: 'Divided', lab: 'North Carolina government' },
+      { val: 'Trifecta', lab: 'Tennessee government' },
+      { val: 'Nov 2026', lab: 'Next governor races' },
+    ]
+  },
+  rejected: {
+    title: 'Considered & rejected.',
+    lede: 'The other zero-income-tax states that came up, and why they were ruled out — kept here so the reasoning doesn\'t need re-deriving later.',
+    stats: () => [
+      { val: REJECTED_STATES.length, lab: 'States reviewed and ruled out' },
+      { val: '9', lab: 'Total zero-income-tax states' },
+      { val: '2', lab: 'States still in play' },
+    ]
+  },
+  diversity: {
+    title: 'Culture & diversity.',
+    lede: 'Ethnic grocery access and community diversity, by location — including the Nolensville Pike corridor, the standout of the whole comparison.',
+    stats: () => [
+      { val: LOCATIONS.filter(l => l.diversity === 'high').length, lab: 'Locations rated High' },
+      { val: LOCATIONS.filter(l => l.diversity === 'low').length, lab: 'Locations rated Low' },
+      { val: '~25-35 min', lab: 'Williamson Co. to Nolensville Pike' },
+    ]
+  },
+  summary: {
+    title: 'Summary — findings across all criteria.',
+    get lede(){ return `Narrative synthesis and full scorecard across all ${LOCATIONS.length} locations and 6 comparison dimensions, generated from your current calculator inputs.`; },
+    stats: () => {
+      const nonVA = lastResults.filter(r => !r.loc.isHome).sort((a,b) => a.total - b.total);
+      const best = nonVA[0];
+      return [
+        { val: LOCATIONS.length, lab: 'Locations evaluated' },
+        { val: best ? `${best.loc.name}, ${best.loc.state}` : '—', lab: 'Lowest-tax relocation pick at current inputs' },
+        { val: lastVAGap.saving > 0 ? fmt(lastVAGap.saving) + '/yr' : '—', lab: 'Est. annual savings vs staying in Ashburn, VA' },
+      ];
+    }
+  },
+  homes: {
+    title: 'Home listings — active & comparison.',
+    lede: 'Live from Google Sheets — add or update listings there and reload this tab. Property tax and location data are computed automatically.',
+    stats: () => {
+      const active = (lastHomesData || []).filter(h => !isArchived(h.status)).sort((a,b) => a.price - b.price);
+      const cheapest = active[0];
+      const avg = active.length ? Math.round(active.reduce((s,h) => s+h.price, 0) / active.length) : 0;
+      return [
+        { val: active.length || '—', lab: 'Active listings' },
+        { val: cheapest ? fmt(cheapest.price) : '—', lab: 'Lowest list price' },
+        { val: avg ? fmt(avg) : '—', lab: 'Average list price (active)' },
+      ];
+    }
+  },
+  requirements: {
+    title: 'Requirements — what we\'re looking for.',
+    lede: 'Full criteria checklist with coverage indicators. Active candidates pulled live from Home Listings. Ruled-out list for reference.',
+    stats: () => {
+      const total = REQUIREMENTS.reduce((n, s) => n + s.items.length, 0);
+      const tracked = REQUIREMENTS.reduce((n, s) => n + s.items.filter(i => i.tracked).length, 0);
+      const candidates = (lastHomesData || []).filter(h => !isArchived(h.status));
+      return [
+        { val: total, lab: 'Total criteria' },
+        { val: `${tracked} / ${total}`, lab: 'Criteria tracked in tool' },
+        { val: candidates.length || '—', lab: 'Active / pending candidates' },
+      ];
+    }
+  },
+  tour: {
+    title: 'Tour notes — home visit records.',
+    lede: 'Captured from Google Forms during tours. Switch between Scorecard (full detail per home) and Compare (up to 3 homes side by side).',
+    stats: () => {
+      const tours = lastTourData || [];
+      const rejected = tours.filter(t => (t.decision||'').toLowerCase() === 'rejected');
+      const last = tours.length ? tours[0].visitDate : '—';
+      return [
+        { val: tours.length || '—', lab: 'Homes toured' },
+        { val: rejected.length || '—', lab: 'Deal breakers / rejected' },
+        { val: last || '—', lab: 'Most recent tour' },
+      ];
+    }
+  },
+};
+
+function gapStatHtml(gap){
+  if (!gap || !gap.amount) return '—';
+  return fmt(gap.amount) + '/yr';
+}
+
+function updateHero(tab){
+  const meta = TAB_META[tab] || TAB_META.calc;
+  document.getElementById('heroTitle').textContent = meta.title;
+  document.getElementById('heroLede').textContent = meta.lede;
+  const stats = meta.stats();
+  const stateColors = { NC: '#3C5A78', TN: '#8B5E3C', VA: '#5A3E72' };
+  document.getElementById('heroStats').innerHTML = stats.map(s => {
+    const winnerTag = s.winner
+      ? `<div><span class="winner-tag-sub" style="background:${stateColors[s.winner] || '#555'}">${s.winner} lower</span></div>`
+      : '';
+    return `<div><div class="num mono">${s.val}</div>${winnerTag}<div class="lab">${s.lab}</div></div>`;
+  }).join('');
+}
+
+const NC_RATE = 0.0399;
+
+// Virginia income tax: progressive brackets, SS exempt, $12k age deduction (65+, phases out above $50k/$75k)
+const VA_STD_DED = { single: 8500, mfj: 17000 };
+const VA_AGE_DED_MAX = { single: 12000, mfj: 24000 };
+const VA_AGE_DED_THRESHOLD = { single: 50000, mfj: 75000 };
+
+function calcVAIncomeTax(dist, filing, approxAGI){
+  // SS is exempt from VA. dist = 401k + deferred comp, fully taxable.
+  const stdDed = VA_STD_DED[filing] || VA_STD_DED.single;
+  const maxAge = VA_AGE_DED_MAX[filing] || VA_AGE_DED_MAX.single;
+  const threshold = VA_AGE_DED_THRESHOLD[filing] || VA_AGE_DED_THRESHOLD.single;
+  // Age deduction phases out $1:$1 above threshold for filers 65+
+  const ageDed = Math.max(0, maxAge - Math.max(0, approxAGI - threshold));
+  const taxable = Math.max(0, dist - stdDed - ageDed);
+  // Virginia uses same brackets for single and MFJ
+  let tax = 0;
+  if (taxable > 17000) tax += (taxable - 17000) * 0.0575;
+  if (taxable > 5000) tax += (Math.min(taxable, 17000) - 5000) * 0.05;
+  if (taxable > 3000) tax += (Math.min(taxable, 5000) - 3000) * 0.03;
+  tax += Math.min(taxable, 3000) * 0.02;
+  return tax;
+}
+
+// effective property tax rate (decimal), typical home price (for reference card only), hospital info
+// crime/climate: 'low' | 'moderate' | 'elevated' — relative to each other in this list, not a national scale
+const LOCATIONS = [
+  { id:'charlotte', name:'Charlotte', state:'NC', county:'Mecklenburg', rate:0.0085, home:430000, lat:35.2271, lng:-80.8431,
+    hosp:'strong', hospNote:'Atrium Health / Carolinas Medical Center — major flagship hospital in-city.',
+    crime:'moderate', crimeNote:'Moderate crime index, trending up — violent crime +6% in 2024. Typical big-metro profile.',
+    climate:'low', climateNote:'Piedmont location, well below the mountains. Occasional hurricane remnant rain; low tornado frequency.',
+    diversity:'high', diversityNote:'NC\'s most ethnically diverse city — 17% foreign-born, strong Latin American/Asian/African communities. International grocery in-city (Super G Mart and others), no special trip required.' },
+  { id:'raleigh', name:'Raleigh', state:'NC', county:'Wake', rate:0.0085, home:455000, lat:35.7796, lng:-78.6382,
+    hosp:'strong', hospNote:'WakeMed, Duke Raleigh, UNC REX — all in-metro, no drive required.',
+    crime:'moderate', crimeNote:'Moderate overall, but homicides rose sharply (10-year high) in recent reporting — worth monitoring the trend, not just the snapshot.',
+    climate:'low', climateNote:'Same Piedmont profile as Charlotte — low tornado/flood frequency relative to TN options.',
+    diversity:'high', diversityNote:'Fast-growing Asian population across the Triangle, with its own international grocery scene — H Mart (Cary, ~20 min), A&C, Fresh International Market near RDU.' },
+  { id:'knoxville', name:'Knoxville', state:'TN', county:'Knox', rate:0.0060, home:350000, lat:35.9606, lng:-83.9207,
+    hosp:'strong', hospNote:'UT Medical Center, Fort Sanders Regional — full-service, in-town.',
+    crime:'low', crimeNote:'Generally lower crime index than the Middle TN towns and lower than Charlotte/Raleigh in city-to-city comparisons.',
+    climate:'moderate', climateNote:'East TN — hillier terrain moderates tornado frequency vs Middle TN, but still sees seasonal severe weather.',
+    diversity:'moderate', diversityNote:'University of Tennessee drives some diversity near campus, with a handful of modest international markets — smaller scale than Nashville or the NC cities.' },
+  { id:'chattanooga', name:'Chattanooga', state:'TN', county:'Hamilton', rate:0.0055, home:399000, lat:35.0456, lng:-85.3097,
+    hosp:'strong', hospNote:'Erlanger, CHI Memorial — full-service, in-town.',
+    crime:'moderate', crimeNote:'Mixed by neighborhood; broadly moderate for a mid-size TN city.',
+    climate:'moderate', climateNote:'Similar terrain-moderated profile to Knoxville — lower tornado exposure than Middle TN.',
+    diversity:'moderate', diversityNote:'Growing diversity, but on a smaller scale — fewer dedicated international markets than Nashville or the NC metros.' },
+  { id:'franklin', name:'Franklin', state:'TN', county:'Williamson', rate:0.0050, home:890000, lat:35.9251, lng:-86.8689,
+    hosp:'strong', hospNote:'Williamson Medical Center in-town; Vanderbilt clinics; Nashville ~25 min.',
+    crime:'low', crimeNote:'One of the safest cities in Tennessee — around 147 violent crimes per 100,000.',
+    climate:'elevated', climateNote:'Middle TN sits in the secondary tornado corridor ("Dixie Alley"); regular spring severe-weather watches and flash-flood risk.',
+    diversity:'low', diversityNote:'Grocery options are mainstream only (Kroger, Whole Foods, Trader Joe\'s). Real ethnic shopping means a ~25-30 min drive to the Nolensville Pike corridor.' },
+  { id:'brentwood', name:'Brentwood', state:'TN', county:'Williamson', rate:0.0040, home:1300000, lat:36.0331, lng:-86.7828,
+    hosp:'mid', hospNote:'Closest of the three to Nashville/Vanderbilt (~15 min); relies on Franklin or Nashville for full hospital.',
+    crime:'low', crimeNote:'The single safest city in Tennessee by most crime indices — roughly 1,200 incidents per 100,000.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/flash-flood exposure as the rest of Williamson County.',
+    diversity:'low', diversityNote:'Same mainstream-only grocery profile as Franklin, though slightly closer to Nashville — Nolensville Pike corridor is ~20 min away.' },
+  { id:'thompsons', name:"Thompson's Station", state:'TN', county:'Williamson', rate:0.0045, home:750000, lat:35.7990, lng:-86.9075,
+    hosp:'mid', hospNote:'Same county access as Franklin, but furthest of the three from a full hospital (~20-25 min).',
+    crime:'low', crimeNote:'Smaller, newer community in the same low-crime Williamson County profile.',
+    climate:'elevated', climateNote:'Same Middle TN exposure as the rest of Williamson County.',
+    diversity:'low', diversityNote:'Same mainstream-only grocery profile as the rest of Williamson County, and the furthest of the cluster from the Nolensville Pike corridor (~30-35 min).' },
+  { id:'fairview', name:'Fairview', state:'TN', county:'Williamson', rate:0.0065, home:500000, lat:35.9815, lng:-87.1291,
+    hosp:'mid', hospNote:'No in-town hospital — Williamson Medical Center in Franklin is ~15-20 min; Vanderbilt University Medical Center in Nashville ~35 min via I-40.',
+    crime:'low', crimeNote:'Crime rate 70% below the national average — violent crime 51% below and property crime 74% below the U.S. average. Consistent with the broader Williamson County low-crime profile.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/flash-flood corridor exposure as the rest of the Nashville-area suburbs.',
+    diversity:'low', diversityNote:'Limited diversity — ~86% White, ~11% Hispanic. Very few ethnic dining or grocery options in-town; mostly mainstream. Nolensville Pike corridor is roughly 35-40 min away.' },
+  { id:'springhill', name:'Spring Hill', state:'TN', county:'Williamson/Maury', rate:0.0048, home:520000, lat:35.7512, lng:-86.9303,
+    hosp:'mid', hospNote:'TriStar ER + Vanderbilt/Williamson clinics locally; full hospital in Franklin ~20 min.',
+    crime:'low', crimeNote:'53% below the national average; lower crime than 99% of comparable US cities.',
+    climate:'elevated', climateNote:'Same Middle TN exposure as the rest of Williamson/Maury.',
+    diversity:'low', diversityNote:'Same mainstream-only grocery profile as the rest of the cluster; Nolensville Pike corridor is roughly 30+ minutes north.' },
+  { id:'murfreesboro', name:'Murfreesboro', state:'TN', county:'Rutherford', rate:0.0048, home:457000, lat:35.8456, lng:-86.3903,
+    hosp:'strong', hospNote:'Ascension Saint Thomas Rutherford — full-service hospital in-town. Strongest standalone access of the affordable towns.',
+    crime:'elevated', crimeNote:'Above the national average — downtown, North Murfreesboro, and Murfreesboro Pike see more assaults/burglaries, though several neighborhoods stay well below the city average.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/flash-flood exposure as the rest of the Nashville metro.',
+    diversity:'moderate', diversityNote:'MTSU and ongoing refugee resettlement support a real but smaller-scale international market presence (e.g. Global Star Market) — more than Williamson County, less than Nolensville Pike.' },
+  { id:'smyrna', name:'Smyrna', state:'TN', county:'Rutherford', rate:0.0055, home:525000, lat:36.0048, lng:-86.5188,
+    hosp:'strong', hospNote:'TriStar StoneCrest Medical Center is in-town — America\'s 250 Best Hospitals (Healthgrades 2026), top 10% nationally for patient safety four consecutive years, and a Leapfrog "Straight A" hospital (6 consecutive A grades through Spring 2026). Among the strongest hospital credentials in this entire comparison.',
+    crime:'moderate', crimeNote:'Moderate crime profile for a mid-size city (~55,000 population). More varied than the Williamson County suburbs but broadly in line with other growing Nashville-area communities.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/severe-weather corridor exposure as the rest of the Nashville-area suburbs.',
+    diversity:'moderate', diversityNote:'Meaningfully more diverse than Williamson County — ~63% White, 21% Black, 10% Hispanic, 4% Asian — driven partly by the large Nissan manufacturing workforce. More international food presence than Williamson County towns, though not as dense as the Nolensville Pike corridor.' },
+  { id:'columbia', name:'Columbia', state:'TN', county:'Maury', rate:0.0045, home:417000, lat:35.6151, lng:-87.0353,
+    hosp:'mid', hospNote:'Maury Regional Medical Center in-town; Franklin/Nashville 30-45 min for specialized care.',
+    crime:'moderate', crimeNote:'Smaller town profile; data is thinner but generally moderate, below Murfreesboro.',
+    climate:'elevated', climateNote:'Same Middle TN exposure, slightly further from the most flood-prone river corridors.',
+    diversity:'low', diversityNote:'Small-town, rural-adjacent grocery profile — limited international options, furthest of the TN towns from Nolensville Pike.' },
+  { id:'antioch', name:'Antioch', state:'TN', county:'Davidson', rate:0.0095, home:405000, lat:36.0589, lng:-86.6711,
+    hosp:'strong', hospNote:'TriStar Southern Hills Medical Center nearby (full-service); Nashville/Vanderbilt ~20 min. Most affordable entry point into the Nashville metro, but Davidson County carries the highest effective property tax rate of any location here.',
+    crime:'elevated', crimeNote:'Reputation locally as one of the higher-crime pockets of Davidson County relative to the Williamson County suburbs — worth verifying against current ZIP-level data before deciding.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/flash-flood exposure as the rest of the Nashville metro.',
+    diversity:'high', diversityNote:'Sits directly on the Nolensville Pike corridor — the single most diverse stretch in this entire comparison, NC included. Largest Kurdish population in the U.S., plus dense Middle Eastern, Southeast Asian, West African, and Latin American markets within a few miles.' },
+  { id:'mtjuliet', name:'Mt. Juliet', state:'TN', county:'Wilson', rate:0.0048, home:635000, lat:36.2001, lng:-86.5186,
+    hosp:'mid', hospNote:'No in-town hospital — Vanderbilt Wilson County Hospital in Lebanon ~15-20 min east; Nashville hospitals ~25-30 min west via I-40.',
+    crime:'low', crimeNote:'Named 4th safest city in Tennessee (SafeWise, 2025) and safest in the state among cities over 18,500 population. Overall crime rate roughly 60% below the national average.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/severe-weather corridor exposure as the rest of the Nashville metro.',
+    diversity:'moderate', diversityNote:'Growing suburb with increasing diversity — more restaurant and grocery variety than Williamson County towns, though primarily mainstream. Part of the fastest-growing county in Tennessee per 2025 Census.' },
+  { id:'lebanon', name:'Lebanon', state:'TN', county:'Wilson', rate:0.0055, home:420000, lat:36.2081, lng:-86.2911,
+    hosp:'strong', hospNote:'Vanderbilt Wilson County Hospital is in-town and full-service, affiliated with Vanderbilt University Medical Center. Strongest hospital access of the Wilson County options.',
+    crime:'moderate', crimeNote:'Lebanon is the county seat with a broader crime profile than suburban Mt. Juliet — moderate overall, with commercial corridors and downtown areas seeing more activity than surrounding neighborhoods.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/severe-weather corridor exposure as the rest of the Nashville metro.',
+    diversity:'moderate', diversityNote:'More diverse than Williamson County suburbs — Latin American and some international communities present, with growing dining variety. Limited ethnic grocery options compared to Antioch/Nolensville Pike.' },
+  { id:'whitehouse', name:'White House', state:'TN', county:'Robertson', rate:0.0050, home:390000, lat:36.4708, lng:-86.6672,
+    hosp:'mid', hospNote:'No in-town hospital — TriStar Hendersonville Medical Center ~12 miles southeast; TriStar NorthCrest Medical Center in Springfield ~14 miles north.',
+    crime:'low', crimeNote:'Overall crime rate approximately 30% below the national average (~1,610 per 100,000 vs ~2,280 nationally). Suburban, family-oriented community with above-average schools.',
+    climate:'elevated', climateNote:'Same Middle TN tornado/severe-weather corridor exposure as the rest of the Nashville-area suburbs.',
+    diversity:'low', diversityNote:'Small outer Nashville suburb (~15,000 population) with limited diversity. Primarily mainstream grocery options; closest international market access is in Hendersonville or Nashville.' },
+  { id:'ashburn', name:'Ashburn', state:'VA', county:'Loudoun', rate:0.00805, home:720000, lat:39.0438, lng:-77.4874, isHome:true,
+    hosp:'strong', hospNote:'Inova Loudoun Hospital in Leesburg (~10-15 min); Inova Fairfax Hospital (~30 min) for high-acuity care. Northern Virginia has among the strongest hospital networks in the Mid-Atlantic.',
+    crime:'low', crimeNote:'Loudoun County and the Broadlands area specifically are among the lowest-crime suburban areas in the DC metro — well below national averages across all categories.',
+    climate:'low', climateNote:'Mid-Atlantic four-season climate: moderate tornado risk, occasional nor\'easters and tropical storm remnants, manageable snow. No severe-weather corridor like Middle TN.',
+    diversity:'high', diversityNote:'Northern Virginia is one of the most diverse regions in the country — dense South Asian, Korean, Chinese, and Latin American communities throughout the Dulles tech corridor. H Mart in Sterling (~15 min), and numerous Indian, Korean, and international grocers within short distance.' },
+];
+
+const MEDIGAP = {
+  NC: { low: 200, high: 220, note: "Middle-of-the-pack nationally, near the $220 national average for Plan G at 65." },
+  TN: { low: 150, high: 190, note: "One of the cheapest states nationally for Medigap Plan G at 65 — well under the national average." },
+  VA: { low: 195, high: 220, note: "Virginia runs slightly below the national average for Plan G, broadly comparable to NC. Note: Loudoun County has strong Medicare Advantage plan density given the Northern Virginia provider network." }
+};
+
+const POLITICS = {
+  NC: {
+    label: 'Divided government',
+    governor: 'Democratic',
+    legislature: 'Republican majority, both chambers',
+    structure: 'Democratic triplex (governor, secretary of state, attorney general) with a Republican-controlled legislature — genuinely divided government.',
+    trend: 'NC is a true swing state — competitive statewide elections most cycles, with control alternating between parties over the past two decades.',
+    localNote: 'Charlotte and Raleigh themselves tend to vote more Democratic than the state overall, typical of the urban/suburban pattern, even while the legislature stays Republican-controlled.'
+  },
+  TN: {
+    label: 'Single-party (Republican) trifecta',
+    governor: 'Republican',
+    legislature: 'Republican supermajority, both chambers (veto-proof)',
+    structure: 'Full Republican trifecta — governorship plus veto-proof supermajorities in both the House and Senate.',
+    trend: 'Tennessee has not elected a Democrat to statewide office since 2006 — among the most lopsided, stable one-party states in the country.',
+    localNote: 'Nashville/Davidson County (where Antioch sits) leans more Democratic locally, but this has no practical effect on statewide policy given the legislature\'s supermajority.'
+  },
+  VA: {
+    label: 'Democratic trifecta (current home state)',
+    governor: 'Democratic — Gov. Abigail Spanberger (elected Nov 2025)',
+    legislature: 'Democratic majority, both chambers (Senate 21-19, House 64-36)',
+    structure: 'Full Democratic trifecta as of 2026 — governorship, state Senate, and House of Delegates all Democratic after Spanberger\'s November 2025 win flipped the governorship from Republican.',
+    trend: 'Virginia is a competitive swing state historically, having had both parties hold the governorship within the past decade. It has trended more Democratic at the statewide level since 2017.',
+    localNote: 'Loudoun County and the Northern Virginia corridor lean reliably Democratic, driven by the large federal contractor and tech workforce population, and are among the most politically engaged suburban areas in the mid-Atlantic.'
+  }
+};
+
+const REJECTED_STATES = [
+  { state: 'Florida', reason: 'Climate', detail: 'No state income tax, easy direct flights to Miami-Dade family, but year-round heat/humidity ruled it out — preference is for a more moderate, four-season climate.' },
+  { state: 'Texas', reason: 'Property tax', detail: 'No income tax, but property taxes run high enough to claw back a meaningful chunk of the savings depending on home value. Not pursued further.' },
+  { state: 'Nevada', reason: 'Distance from family/network', detail: 'No income tax, but far from both the Miami-Dade family and the existing Northern Virginia network — a bigger lifestyle disruption than NC/TN for comparable tax benefit.' },
+  { state: 'Washington', reason: 'No longer a clean zero-tax state', detail: 'Now taxes some high-income capital gains, with income over $1M facing tax soon — not a true zero-tax state for all income types anymore. Also geographically the furthest option from family.' },
+  { state: 'Alaska', reason: 'Cost of living & climate', detail: 'No income tax, but high cost of living and a climate that\'s the opposite of the moderate four-season preference. Also furthest possible option from Miami-Dade family.' },
+  { state: 'Wyoming', reason: 'Rural / distance', detail: 'No income tax, low cost of living, but rural with cold winters and far from both family networks. Not pursued.' },
+  { state: 'South Dakota', reason: 'Rural / distance', detail: 'Same profile as Wyoming — low cost, no income tax, but rural, cold, and far from existing family and social ties.' },
+  { state: 'New Hampshire', reason: 'Distance / climate', detail: 'No tax on wages or retirement income (its old interest/dividends tax was repealed), but cold winters and far from both Northern Virginia and Miami-Dade. Not pursued.' },
+];
+
+const SALES_TAX = { NC: 0.0698, TN: 0.0955, VA: 0.060 };
+
+function calcLocation(loc, ss, dist, homeval, filing, std){
+  const effectiveHomeVal = propTaxMode === 'market' ? loc.home : homeval;
+  const propTax = effectiveHomeVal * loc.rate;
+  let incomeTax;
+  if (loc.state === 'NC'){
+    const taxableNC = Math.max(0, dist - std);
+    incomeTax = taxableNC * NC_RATE;
+  } else if (loc.state === 'VA'){
+    // SS included in federal AGI at up to 85% for most retirees (conservative estimate)
+    const approxAGI = Math.round(ss * 0.85) + dist;
+    incomeTax = calcVAIncomeTax(dist, filing, approxAGI);
+  } else {
+    incomeTax = 0; // TN
+  }
+  return { incomeTax, propTax, total: incomeTax + propTax };
+}
+
+function fmt(n){ return '$' + Math.round(n).toLocaleString(); }
+
+function renderLedger(){
+  const ss = +document.getElementById('ss').value;
+  const dist = +document.getElementById('dist').value;
+  const homeval = +document.getElementById('homeval').value;
+  const filing = document.getElementById('filing').value;
+  const std = STD_DEDUCTION[filing];
+
+  const results = LOCATIONS.map(loc => ({ loc, ...calcLocation(loc, ss, dist, homeval, filing, std) }));
+  lastResults = results; // share with summary tab
+  results.sort((a,b) => a.total - b.total);
+  const maxTotal = Math.max(...results.map(r => r.total), 1);
+
+  const rowsEl = document.getElementById('ledgerRows');
+  rowsEl.innerHTML = results.map(r => {
+    const incomePct = (r.incomeTax / maxTotal) * 100;
+    const propPct = (r.propTax / maxTotal) * 100;
+    const tag = r.loc.state === 'NC' ? 'tag-nc' : r.loc.state === 'VA' ? 'tag-va' : 'tag-tn';
+    const homeMark = r.loc.isHome ? ' &#9655;' : '';
+    return `<div class="ledger-row" data-id="${r.loc.id}" data-state="${r.loc.state}">
+      <div class="name"><span class="state-tag ${tag}">${r.loc.state}</span>${r.loc.name}${homeMark}</div>
+      <div class="bar-track">
+        <div class="bar-seg seg-income" style="width:${incomePct}%"></div>
+        <div class="bar-seg seg-prop" style="width:${propPct}%"></div>
+      </div>
+      <div class="total mono">${fmt(r.total)}</div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#ledgerRows .ledger-row').forEach(row => {
+    row.addEventListener('click', () => jumpToReference(row.dataset.id));
+  });
+
+  applyLedgerFilter();
+
+  // gaps: best NC vs best TN (cheapest-total location in each state), with direction
+  const bestNC = results.filter(r => r.loc.state === 'NC').sort((a,b)=>a.total-b.total)[0];
+  const bestTN = results.filter(r => r.loc.state === 'TN').sort((a,b)=>a.total-b.total)[0];
+  const vaResult = results.find(r => r.loc.id === 'ashburn');
+  if (bestNC && bestTN){
+    const incomeDiff = bestNC.incomeTax - bestTN.incomeTax;
+    lastIncomeGap = { amount: Math.abs(incomeDiff), state: incomeDiff > 0 ? 'TN' : (incomeDiff < 0 ? 'NC' : null) };
+    const totalDiff = bestNC.total - bestTN.total;
+    lastTotalGap = { amount: Math.abs(totalDiff), state: totalDiff > 0 ? 'TN' : (totalDiff < 0 ? 'NC' : null), ncPick: bestNC.loc, tnPick: bestTN.loc };
+  }
+  if (vaResult){
+    // Find best overall relocation pick (cheapest non-VA location)
+    const bestReloc = results.filter(r => r.loc.state !== 'VA').sort((a,b) => a.total - b.total)[0];
+    if (bestReloc){
+      lastVAGap = {
+        vaTotal: vaResult.total,
+        bestReloc: bestReloc.loc,
+        relocTotal: bestReloc.total,
+        saving: vaResult.total - bestReloc.total
+      };
+    }
+  }
+  updateHero(currentTab);
+  if (currentTab === 'calc' || currentTab === 'ledger') renderWinnerBanner();
+  if (currentTab === 'summary') renderSummary();
+
+  renderHeadToHead(results, std);
+}
+
+function stateToneTag(state){
+  if (!state) return '';
+  const names = { TN: 'Tennessee', NC: 'North Carolina', VA: 'Virginia' };
+  const full = names[state] || state;
+  return `<span class="winner-tag" style="background:var(--${state.toLowerCase()})">${full}</span>`;
+}
+
+function renderWinnerBanner(){
+  const el = document.getElementById('winnerBanner');
+  if (!el){ return; }
+  let html = '';
+  if (lastTotalGap.state){
+    const winner = lastTotalGap.state === 'TN' ? lastTotalGap.tnPick : lastTotalGap.ncPick;
+    const runnerUp = lastTotalGap.state === 'TN' ? lastTotalGap.ncPick : lastTotalGap.tnPick;
+    html += `<div class="winner-banner tone-${lastTotalGap.state.toLowerCase()}">
+      ${stateToneTag(lastTotalGap.state)}
+      <span><b>${winner.name}, ${winner.state}</b> beats <b>${runnerUp.name}, ${runnerUp.state}</b> (best alternative) by</span>
+      <span class="winner-amount">${fmt(lastTotalGap.amount)}/yr</span>
+      <span>in combined income + property tax.</span>
+    </div>`;
+  }
+  if (lastVAGap.saving > 0 && lastVAGap.bestReloc){
+    html += `<div class="winner-banner" style="background:#F0EBF5;border-left:4px solid var(--va);margin-top:8px;">
+      <span class="winner-tag" style="background:var(--va)">VA → ${lastVAGap.bestReloc.state}</span>
+      <span>Moving from Ashburn, VA to <b>${lastVAGap.bestReloc.name}</b> saves</span>
+      <span class="winner-amount">${fmt(lastVAGap.saving)}/yr</span>
+      <span>in combined tax at these inputs.</span>
+    </div>`;
+  } else if (lastVAGap.saving < 0 && lastVAGap.bestReloc){
+    html += `<div class="winner-banner" style="background:#F0EBF5;border-left:4px solid var(--va);margin-top:8px;">
+      <span class="winner-tag" style="background:var(--va)">VA baseline</span>
+      <span>Ashburn, VA costs <b>${fmt(Math.abs(lastVAGap.saving))}/yr less</b> than ${lastVAGap.bestReloc.name} at these inputs — relocation may not save on property tax.</span>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function badgeClass(level){
+  return level === 'strong' ? 'hosp-strong' : level === 'mid' ? 'hosp-mid' : 'hosp-weak';
+}
+function badgeLabel(level){
+  return level === 'strong' ? 'Full hospital in-town' : level === 'mid' ? 'Clinic/ER local, hospital nearby' : 'Limited local access';
+}
+
+function renderHeadToHead(results, std){
+  const selA = document.getElementById('compareA');
+  const selB = document.getElementById('compareB');
+
+  // populate both selects on first run
+  if (!selA.options.length){
+    const opts = [...LOCATIONS].sort((a,b) => a.name.localeCompare(b.name)).map(l => `<option value="${l.id}">${l.name}, ${l.state}</option>`).join('');
+    selA.innerHTML = opts;
+    selB.innerHTML = opts;
+    selA.value = 'murfreesboro';
+    selB.value = 'charlotte';
+  }
+
+  const a = results.find(r => r.loc.id === selA.value) || results[0];
+  const b = results.find(r => r.loc.id === selB.value) || results[1];
+
+  const el = document.getElementById('headToHead');
+  el.innerHTML = [a,b].map(r => `
+    <div class="place-card ${r.loc.state==='TN'?'tn':r.loc.state==='VA'?'va':''}">
+      <h4>${r.loc.name}, ${r.loc.state}</h4>
+      <div class="meta">${r.loc.county} County</div>
+      <div class="stat-line"><span>State income tax</span><span class="v">${fmt(r.incomeTax)}/yr</span></div>
+      <div class="stat-line"><span>Property tax (est.)</span><span class="v">${fmt(r.propTax)}/yr</span></div>
+      <div class="stat-line"><span>Total estimated</span><span class="v">${fmt(r.total)}/yr</span></div>
+      <span class="hosp-badge ${badgeClass(r.loc.hosp)}">${badgeLabel(r.loc.hosp)}</span>
+      <p>${r.loc.hospNote}</p>
+    </div>
+  `).join('');
+}
+
+function riskBadgeClass(level){
+  return level === 'low' ? 'risk-low' : level === 'moderate' ? 'risk-moderate' : 'risk-elevated';
+}
+function riskBadgeLabel(prefix, level){
+  const word = level === 'low' ? 'Low' : level === 'moderate' ? 'Moderate' : 'Elevated';
+  return `${prefix}: ${word}`;
+}
+function diversityBadgeClass(level){
+  // inverted scale from risk badges: high diversity is the favorable outcome here
+  return level === 'high' ? 'risk-low' : level === 'moderate' ? 'risk-moderate' : 'risk-elevated';
+}
+function diversityBadgeLabel(level){
+  const word = level === 'high' ? 'High' : level === 'moderate' ? 'Moderate' : 'Low';
+  return `Diversity: ${word}`;
+}
+
+function initCompare3(){
+  const selA = document.getElementById('c3selA');
+  if (!selA || selA.options.length > 0) return; // already initialized, skip
+  const sorted = [...LOCATIONS].sort((a,b) => a.name.localeCompare(b.name));
+  const opts = sorted.map(l => `<option value="${l.id}">${l.name}, ${l.state}</option>`).join('');
+  const noneOpt = `<option value="">— none —</option>`;
+  ['c3selA','c3selB','c3selC'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = noneOpt + opts;
+    el.addEventListener('change', renderCompare3);
+  });
+  // sensible defaults: Murfreesboro, Franklin, Charlotte
+  const defaults = ['murfreesboro','franklin','charlotte'];
+  ['c3selA','c3selB','c3selC'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.value = defaults[i];
+  });
+  renderCompare3();
+}
+
+function renderCompare3(){
+  const ids = ['c3selA','c3selB','c3selC'].map(id => {
+    const el = document.getElementById(id);
+    return el ? el.value : '';
+  });
+  const locs = ids.map(id => id ? LOCATIONS.find(l => l.id === id) : null);
+  const el = document.getElementById('compare3Grid');
+
+  const filled = locs.filter(Boolean);
+  if (!filled.length){
+    el.innerHTML = '<div class="compare3-empty">Select at least one city above to compare.</div>';
+    return;
+  }
+
+  el.innerHTML = locs.map(loc => {
+    if (!loc) return `<div class="compare3-card" style="background:#F8F9F6;border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;min-height:200px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9aa093;">No city selected</span></div>`;
+    const stateClass = loc.state === 'NC' ? 'nc' : loc.state === 'VA' ? 'va' : 'tn';
+    const mg = MEDIGAP[loc.state];
+    return `
+    <div class="compare3-card ${stateClass}">
+      <div class="c3-head">${loc.name}${loc.isHome ? ' &#9655;' : ''}<br><span style="font-size:12px;font-family:'IBM Plex Mono',sans-serif;font-weight:400;opacity:.85;">${loc.state} &middot; ${loc.county} County</span></div>
+      <div class="c3-body">
+        <div class="c3-row"><span class="c3-label">Typical home price</span><span class="c3-val">${fmt(loc.home)}</span></div>
+        <div class="c3-row"><span class="c3-label">Property tax rate</span><span class="c3-val">${(loc.rate*100).toFixed(2)}%</span></div>
+        <div class="c3-row"><span class="c3-label">Est. property tax</span><span class="c3-val">${fmt(Math.round(loc.home * loc.rate))}/yr</span></div>
+        <div class="c3-row"><span class="c3-label">State income tax</span><span class="c3-val">${loc.state === 'TN' ? '$0' : loc.state === 'VA' ? '2%–5.75% graduated' : '3.99% flat'}</span></div>
+        <div class="c3-row"><span class="c3-label">Sales tax (state avg)</span><span class="c3-val">${(SALES_TAX[loc.state]*100).toFixed(2)}%</span></div>
+        <div class="c3-row"><span class="c3-label">Medigap Plan G (est.)</span><span class="c3-val">$${mg.low}–${mg.high}/mo</span></div>
+      </div>
+      <div class="c3-badges">
+        <span class="hosp-badge ${badgeClass(loc.hosp)}" style="font-size:11px;">${badgeLabel(loc.hosp)}</span>
+        <span class="hosp-badge ${riskBadgeClass(loc.crime)}" style="font-size:11px;">${riskBadgeLabel('Crime', loc.crime)}</span>
+        <span class="hosp-badge ${riskBadgeClass(loc.climate)}" style="font-size:11px;">${riskBadgeLabel('Weather', loc.climate)}</span>
+        <span class="hosp-badge ${diversityBadgeClass(loc.diversity)}" style="font-size:11px;">${diversityBadgeLabel(loc.diversity)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderReference(){
+  const el = document.getElementById('refCards');
+  const sorted = [...LOCATIONS].sort((a,b) => a.name.localeCompare(b.name));
+  el.innerHTML = sorted.map(loc => {
+    const mg = MEDIGAP[loc.state];
+    return `
+    <div class="place-card ${loc.state==='TN'?'tn':loc.state==='VA'?'va':''}" data-id="${loc.id}" data-state="${loc.state}" data-county="${loc.county}">
+      ${loc.isHome ? '<span class="home-badge">&#9655; Current home</span>' : ''}
+      <h4>${loc.name}</h4>
+      <div class="meta">${loc.state} &middot; ${loc.county} County</div>
+      <div class="stat-line"><span>Typical home price</span><span class="v">${fmt(loc.home)}</span></div>
+      <div class="stat-line"><span>Effective property tax</span><span class="v">${(loc.rate*100).toFixed(2)}%</span></div>
+      <div class="stat-line"><span>State income tax on dist.</span><span class="v">${loc.state==='TN'?'None':loc.state==='VA'?'2%–5.75% graduated':'3.99% flat'}</span></div>
+      <div class="stat-line"><span>Sales tax (state avg)</span><span class="v">${(SALES_TAX[loc.state]*100).toFixed(2)}%</span></div>
+      <div class="stat-line"><span>Medigap Plan G (age 65, state avg)</span><span class="v">$${mg.low}&ndash;${mg.high}/mo</span></div>
+      <div class="badge-row">
+        <span class="hosp-badge ${badgeClass(loc.hosp)}">${badgeLabel(loc.hosp)}</span>
+        <span class="hosp-badge ${riskBadgeClass(loc.crime)}">${riskBadgeLabel('Crime', loc.crime)}</span>
+        <span class="hosp-badge ${riskBadgeClass(loc.climate)}">${riskBadgeLabel('Severe weather', loc.climate)}</span>
+        <span class="hosp-badge clickable ${diversityBadgeClass(loc.diversity)}" data-jump-id="${loc.id}" title="See Culture & Diversity tab">${diversityBadgeLabel(loc.diversity)}</span>
+      </div>
+      <p>${loc.hospNote}</p>
+      <p class="extra-stat">${loc.crimeNote}</p>
+      <p class="extra-stat">${loc.climateNote}</p>
+      <p class="extra-stat">${mg.note}</p>
+    </div>
+  `;
+  }).join('');
+  populateCountyFilter();
+  applyReferenceFilter();
+
+  document.querySelectorAll('#refCards .hosp-badge.clickable').forEach(badge => {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      jumpToDiversity(badge.dataset.jumpId);
+    });
+  });
+}
+
+function populateCountyFilter(){
+  const stateFilter = document.querySelector('#refStateFilters button.active')?.dataset.refState || 'all';
+  const counties = [...new Set(LOCATIONS.filter(l => stateFilter === 'all' || l.state === stateFilter).map(l => l.county))].sort();
+  const sel = document.getElementById('refCountyFilter');
+  const prevValue = sel.value;
+  sel.innerHTML = '<option value="all">All counties</option>' + counties.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = counties.includes(prevValue) ? prevValue : 'all';
+}
+
+function applyReferenceFilter(){
+  const stateFilter = document.querySelector('#refStateFilters button.active')?.dataset.refState || 'all';
+  const countyFilter = document.getElementById('refCountyFilter').value;
+  document.querySelectorAll('#refCards .place-card').forEach(card => {
+    const matchesState = stateFilter === 'all' || card.dataset.state === stateFilter;
+    const matchesCounty = countyFilter === 'all' || card.dataset.county === countyFilter;
+    card.style.display = (matchesState && matchesCounty) ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('#refStateFilters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#refStateFilters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    populateCountyFilter();
+    applyReferenceFilter();
+  });
+});
+
+document.getElementById('refCountyFilter').addEventListener('change', applyReferenceFilter);
+
+function jumpToReference(id){
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('nav.tabs button[data-tab="reference"]').classList.add('active');
+  document.getElementById('reference').classList.add('active');
+  currentTab = 'reference';
+  updateHero(currentTab);
+
+  // reset reference filters so the target card is guaranteed visible
+  document.querySelectorAll('#refStateFilters button').forEach(b => b.classList.remove('active'));
+  document.querySelector('#refStateFilters button[data-ref-state="all"]').classList.add('active');
+  document.getElementById('refCountyFilter').value = 'all';
+  populateCountyFilter();
+  applyReferenceFilter();
+
+  const card = document.querySelector(`#refCards .place-card[data-id="${id}"]`);
+  if (card){
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('highlight');
+    // restart animation
+    void card.offsetWidth;
+    card.classList.add('highlight');
+  }
+}
+
+function renderDiversity(){
+  const el = document.getElementById('diversityCards');
+  el.innerHTML = [...LOCATIONS].sort((a,b) => a.name.localeCompare(b.name)).map(loc => `
+    <div class="place-card ${loc.state==='TN'?'tn':loc.state==='VA'?'va':''}" data-id="${loc.id}">
+      <h4>${loc.name}</h4>
+      <div class="meta">${loc.state} &middot; ${loc.county} County</div>
+      <span class="hosp-badge ${diversityBadgeClass(loc.diversity)}">${diversityBadgeLabel(loc.diversity)}</span>
+      <p>${loc.diversityNote}</p>
+    </div>
+  `).join('');
+}
+
+function jumpToDiversity(id){
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('nav.tabs button[data-tab="diversity"]').classList.add('active');
+  document.getElementById('diversity').classList.add('active');
+  currentTab = 'diversity';
+  updateHero(currentTab);
+
+  const card = document.querySelector(`#diversityCards .place-card[data-id="${id}"]`);
+  if (card){
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('highlight');
+    void card.offsetWidth;
+    card.classList.add('highlight');
+  }
+}
+
+function applyLedgerFilter(){
+  const activeBtn = document.querySelector('#ledger .map-filters button.active');
+  const filter = activeBtn ? activeBtn.dataset.ledgerFilter : 'all';
+  document.querySelectorAll('#ledgerRows .ledger-row').forEach(row => {
+    row.style.display = (filter === 'all' || row.dataset.state === filter) ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('#ledger .map-filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#ledger .map-filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyLedgerFilter();
+  });
+});
+
+function renderHomePrices(){
+  const sorted = [...LOCATIONS].sort((a,b) => a.home - b.home);
+  const maxPrice = Math.max(...sorted.map(l => l.home));
+  const rowsEl = document.getElementById('homePriceRows');
+  rowsEl.innerHTML = sorted.map(loc => {
+    const pct = (loc.home / maxPrice) * 100;
+    const segClass = loc.state === 'NC' ? 'seg-price-nc' : loc.state === 'VA' ? 'seg-price-va' : 'seg-price-tn';
+    const tag = loc.state === 'NC' ? 'tag-nc' : loc.state === 'VA' ? 'tag-va' : 'tag-tn';
+    const homeMark = loc.isHome ? ' &#9655;' : '';
+    return `<div class="ledger-row" data-id="${loc.id}" data-state="${loc.state}">
+      <div class="name"><span class="state-tag ${tag}">${loc.state}</span>${loc.name}${homeMark}</div>
+      <div class="bar-track">
+        <div class="bar-seg ${segClass}" style="width:${pct}%"></div>
+      </div>
+      <div class="total mono">${fmt(loc.home)}</div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#homePriceRows .ledger-row').forEach(row => {
+    row.addEventListener('click', () => jumpToReference(row.dataset.id));
+  });
+
+  applyPriceFilter();
+}
+
+function applyPriceFilter(){
+  const activeBtn = document.querySelector('#homeprices .map-filters button.active');
+  const filter = activeBtn ? activeBtn.dataset.priceFilter : 'all';
+  document.querySelectorAll('#homePriceRows .ledger-row').forEach(row => {
+    row.style.display = (filter === 'all' || row.dataset.state === filter) ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('#homeprices .map-filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#homeprices .map-filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyPriceFilter();
+  });
+});
+
+let leafletMap = null;
+let mapMarkers = [];
+
+function initMap(){
+  if (leafletMap) { leafletMap.invalidateSize(); return; }
+
+  leafletMap = L.map('map', { scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(leafletMap);
+
+  const cssVars = getComputedStyle(document.documentElement);
+  const ncColor = cssVars.getPropertyValue('--nc').trim();
+  const tnColor = cssVars.getPropertyValue('--tn').trim();
+
+  mapMarkers = LOCATIONS.map(loc => {
+    const color = loc.state === 'NC' ? ncColor : tnColor;
+    const marker = L.circleMarker([loc.lat, loc.lng], {
+      radius: 9,
+      fillColor: color,
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 0.9
+    }).addTo(leafletMap);
+    marker.bindPopup(`<b>${loc.name}, ${loc.state}</b><br>${loc.county} County<br>Property tax: ${(loc.rate*100).toFixed(2)}%<br>Typical home: ${fmt(loc.home)}`);
+    marker.locState = loc.state;
+    return marker;
+  });
+
+  const bounds = L.latLngBounds(LOCATIONS.map(l => [l.lat, l.lng]));
+  leafletMap.fitBounds(bounds, { padding: [40, 40] });
+}
+
+function filterMap(state){
+  mapMarkers.forEach(m => {
+    const show = state === 'all' || m.locState === state;
+    if (show && !leafletMap.hasLayer(m)) leafletMap.addLayer(m);
+    if (!show && leafletMap.hasLayer(m)) leafletMap.removeLayer(m);
+  });
+}
+
+document.querySelectorAll('#map-panel .map-filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#map-panel .map-filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterMap(btn.dataset.filter);
+  });
+});
+
+const CHECKLIST = [
+  { section: 'Before you commit', sub: 'Validate the decision with real visits and real numbers.', items: [
+    { id: 'visit-each-season', label: 'Visit top 2-3 candidate towns in more than one season (esp. a TN spring storm season)' },
+    { id: 'verify-rates', label: 'Verify property tax rate and home values directly with the county assessor, not just estimates' },
+    { id: 'shadow-week', label: 'Spend a trial week actually living in the top choice — groceries, traffic, doctor drive times' },
+    { id: 'talk-to-locals', label: 'Talk to a few actual residents (not just realtors) about crime, traffic, HOA culture' },
+  ]},
+  { section: 'Tax & legal', sub: 'Establishing domicile correctly matters for tax purposes, not just where you sleep.', items: [
+    { id: 'establish-domicile', label: 'Understand state domicile rules — driver\'s license, voter registration, vehicle title all need to match your new state' },
+    { id: 'final-nc-return', label: 'Plan your final part-year Virginia state tax return for the year you move (VA taxes income earned while domiciled there)' },
+    { id: 'update-estate-docs', label: 'Review/update will, power of attorney, and healthcare proxy for new-state requirements' },
+    { id: 'vehicle-registration', label: 'Re-register vehicles and transfer titles within the new state\'s required window' },
+    { id: 'consult-cpa', label: 'Run the actual move year past a CPA — part-year residency rules can be more complex than a flat-rate comparison suggests' },
+  ]},
+  { section: 'Healthcare & Medicare', sub: 'Coverage gaps during a move are avoidable with enough lead time.', items: [
+    { id: 'medigap-shopping', label: 'Shop Medigap/Medicare Advantage plans available at the new ZIP code before moving — coverage and price both vary by county' },
+    { id: 'find-pcp', label: 'Identify and get on a waitlist for a new primary care physician — good ones can have long waits' },
+    { id: 'transfer-records', label: 'Arrange medical record transfer from current providers' },
+    { id: 'prescription-transfer', label: 'Confirm pharmacy and prescription transfer, including any specialty medications' },
+    { id: 'ship-counseling', label: 'Consider a free SHIP (State Health Insurance Assistance Program) counseling session in the new state' },
+  ]},
+  { section: 'Financial & accounts', sub: 'Addresses follow you everywhere — get ahead of it.', items: [
+    { id: 'update-ss-address', label: 'Update address with Social Security Administration' },
+    { id: 'update-401k-address', label: 'Update address with 401k/deferred comp plan administrator and IRA custodian' },
+    { id: 'banking-local', label: 'Decide whether to open a local bank presence or keep current bank/credit union' },
+    { id: 'homeowners-insurance', label: 'Get homeowners insurance quotes in the new location, including wind/flood riders if relevant' },
+    { id: 'umbrella-policy', label: 'Confirm auto/umbrella insurance policies transfer or need re-quoting for the new state' },
+  ]},
+  { section: 'Housing & move logistics', sub: 'The physical move, decoupled from the financial decision.', items: [
+    { id: 'sell-or-rent', label: 'Decide sell vs. rent on current home, and model both' },
+    { id: 'home-inspection', label: 'Get an independent inspection on any new home before closing — don\'t rely solely on agent walkthroughs' },
+    { id: 'movers-quotes', label: 'Get at least 3 moving company quotes if not doing it yourself' },
+    { id: 'mail-forwarding', label: 'Set up USPS mail forwarding and update address with key institutions' },
+    { id: 'utilities-setup', label: 'Set up utilities, internet, and any HOA paperwork ahead of move-in' },
+  ]},
+  { section: 'Family & care coordination', sub: 'Specific to managing care for your parent from a new distance.', items: [
+    { id: 'discuss-with-siblings', label: 'Talk through the move with Miami-Dade siblings — confirm who\'s the primary point of contact in an emergency post-move' },
+    { id: 'update-care-poa', label: 'Confirm your role on any healthcare proxy/POA for your parent still works logistically from the new location' },
+    { id: 'flight-baseline', label: 'Establish a baseline travel plan (flights/driving time) for routine visits vs. emergency response' },
+    { id: 'local-backup-plan', label: 'Identify what backup support exists if you can\'t get there quickly (sibling coverage, care agency, etc.)' },
+  ]},
+  { section: 'Community & settling in', sub: 'The soft factors that determine whether it actually feels like home.', items: [
+    { id: 'find-church', label: 'Identify and visit a few congregations in the new area before committing to one' },
+    { id: 'social-clubs', label: 'Look into local clubs, volunteer groups, or recreational activities to build a social network' },
+    { id: 'register-to-vote', label: 'Register to vote in the new state' },
+    { id: 'local-services', label: 'Identify a new dentist, mechanic, and other recurring service providers in advance' },
+  ]},
+];
+
+function loadChecklistState(){
+  try {
+    const raw = localStorage.getItem('relocation-checklist-state');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e){ return {}; }
+}
+function saveChecklistState(state){
+  try { localStorage.setItem('relocation-checklist-state', JSON.stringify(state)); } catch(e){ /* ignore */ }
+}
+
+function renderChecklist(){
+  const state = loadChecklistState();
+  const container = document.getElementById('checklistContainer');
+  container.innerHTML = CHECKLIST.map(sec => `
+    <div class="checklist-section">
+      <h3>${sec.section}</h3>
+      <div class="section-sub">${sec.sub}</div>
+      ${sec.items.map(item => `
+        <div class="checklist-item ${state[item.id] ? 'checked' : ''}">
+          <input type="checkbox" id="chk-${item.id}" ${state[item.id] ? 'checked' : ''}>
+          <label for="chk-${item.id}">${item.label}</label>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const s = loadChecklistState();
+      const id = cb.id.replace('chk-', '');
+      s[id] = cb.checked;
+      saveChecklistState(s);
+      cb.closest('.checklist-item').classList.toggle('checked', cb.checked);
+      updateChecklistProgress();
+      if (currentTab === 'checklist') updateHero('checklist');
+    });
+  });
+
+  updateChecklistProgress();
+}
+
+function updateChecklistProgress(){
+  const state = loadChecklistState();
+  const total = CHECKLIST.reduce((sum, sec) => sum + sec.items.length, 0);
+  const checked = Object.values(state).filter(Boolean).length;
+  const pct = total ? Math.round((checked / total) * 100) : 0;
+  document.getElementById('checklistProgressBar').style.width = pct + '%';
+}
+
+document.getElementById('checklistReset').addEventListener('click', () => {
+  if (confirm('Clear all checked items on this device?')){
+    saveChecklistState({});
+    renderChecklist();
+  }
+});
+
+function renderPolitics(){
+  const stateNames = { NC: 'North Carolina', TN: 'Tennessee', VA: 'Virginia (current home)' };
+  const el = document.getElementById('politicsCards');
+  el.innerHTML = Object.entries(POLITICS).map(([state, p]) => `
+    <div class="place-card ${state==='TN'?'tn':state==='VA'?'va':''}">
+      ${state === 'VA' ? '<span class="home-badge">&#9655; Current home state</span>' : ''}
+      <h4>${stateNames[state] || state}</h4>
+      <div class="meta">${p.label}</div>
+      <div class="stat-line"><span>Governor</span><span class="v">${p.governor}</span></div>
+      <div class="stat-line"><span>Legislature</span><span class="v">${p.legislature}</span></div>
+      <p>${p.structure}</p>
+      <p class="extra-stat">${p.trend}</p>
+      <p class="extra-stat">${p.localNote}</p>
+    </div>
+  `).join('');
+}
+
+function renderRejected(){
+  const el = document.getElementById('rejectedCards');
+  el.innerHTML = REJECTED_STATES.map(r => `
+    <div class="place-card rejected">
+      <span class="rejected-badge">Rejected</span>
+      <h4>${r.state}</h4>
+      <div class="meta">Reason: ${r.reason}</div>
+      <p>${r.detail}</p>
+    </div>
+  `).join('');
+}
+
+function renderSummary(){
+  if (!lastResults.length){ return; }
+
+  const sorted = [...lastResults].sort((a,b) => a.total - b.total);
+  const va = sorted.find(r => r.loc.id === 'ashburn');
+  const bestOverall = sorted.filter(r => !r.loc.isHome)[0];
+  const worstOverall = sorted[sorted.length - 1];
+  const bestTN = sorted.filter(r => r.loc.state === 'TN').sort((a,b) => a.total - b.total)[0];
+  const bestNC = sorted.filter(r => r.loc.state === 'NC').sort((a,b) => a.total - b.total)[0];
+
+  const highDiversity = LOCATIONS.filter(l => l.diversity === 'high').map(l => l.name);
+  const strongHosp = LOCATIONS.filter(l => l.hosp === 'strong').map(l => l.name);
+  const lowCrime = LOCATIONS.filter(l => l.crime === 'low').map(l => l.name);
+  const wilCo = LOCATIONS.filter(l => l.county.includes('Williamson')).map(l => l.name);
+
+  const taxNotes = sorted.filter(r => !r.loc.isHome).slice(0,3)
+    .map(r => `${r.loc.name}, ${r.loc.state} (${fmt(r.total)}/yr)`).join('; ');
+
+  const vaNote = va
+    ? (lastVAGap.saving > 0
+        ? `Moving from Ashburn to the best relocation pick saves an estimated <strong>${fmt(lastVAGap.saving)}/yr</strong> in combined income and property tax at your current inputs.`
+        : `At your current inputs, Ashburn's combined income + property tax is competitive with some relocation options — confirm your home value and income assumptions before concluding that staying is cheaper.`)
+    : '';
+
+  const paras = [
+    { cls: 'highlight', text: `<strong>Tax picture.</strong> At your current calculator inputs, the three lowest-cost locations are: ${taxNotes}. Tennessee locations dominate the top of the ranking because TN charges <strong>$0 state income tax</strong> on retirement income. NC taxes 401k/deferred comp withdrawals at a flat 3.99% above the standard deduction; Virginia uses graduated rates of 2%–5.75% on the same income (Social Security is exempt in all three states). ${vaNote}` },
+
+    { cls: '', text: `<strong>Hospital access.</strong> ${strongHosp.join(', ')} all have full-service hospitals in-town or within 15 minutes. Among the affordable Tennessee locations, <strong>Murfreesboro</strong> stands out — Ascension Saint Thomas Rutherford is a recognized joint-replacement center in-town, the strongest standalone hospital access of any sub-$500k TN location. The Williamson County cluster (Franklin, Brentwood, Thompson's Station, Spring Hill) relies on Williamson Medical Center in Franklin or Nashville for anything beyond urgent care.` },
+
+    { cls: '', text: `<strong>Safety &amp; crime.</strong> The lowest-crime locations in this comparison are the Williamson County towns: <strong>${wilCo.join(', ')}</strong>, plus <strong>Knoxville</strong> and <strong>Spring Hill</strong>. Brentwood has the single lowest crime rate in Tennessee. On the other side, <strong>Murfreesboro</strong>, <strong>Antioch</strong>, and the <strong>Charlotte/Raleigh</strong> metros all run at or above national averages — though all three are large enough that neighborhood selection within the city matters significantly.` },
+
+    { cls: '', text: `<strong>Diversity &amp; culture.</strong> The highest-rated locations for ethnic grocery access and community diversity are: <strong>${highDiversity.join(', ')}</strong>. <strong>Antioch</strong> is uniquely positioned on Nashville's Nolensville Pike corridor — the densest international food corridor in this entire comparison. <strong>Ashburn</strong> benefits from the Northern Virginia tech corridor's dense South Asian, Korean, and Latin American communities. The <strong>Williamson County cluster</strong> (Franklin, Brentwood, Thompson's Station, Spring Hill) is the weak point — mainstream grocery only, with the Nolensville Pike corridor a 25–35 minute drive.` },
+
+    { cls: 'warn', text: `<strong>Key trade-off.</strong> The safest, lowest-crime TN locations are all in Williamson County — but they also have the highest home prices in the TN comparison ($750k–$1.3M median), the lowest diversity ratings, and no in-town full-service hospital. The most affordable TN locations with strong hospital access (Murfreesboro, Knoxville, Chattanooga) all carry elevated crime or weather-risk flags. <strong>There is no single location in this comparison that leads on all six dimensions</strong> — the decision ultimately comes down to which 2–3 criteria matter most to you.` },
+
+    { cls: '', text: `<strong>Climate &amp; weather risk.</strong> All Middle Tennessee locations — including the entire Nashville-area cluster — sit in the secondary U.S. tornado corridor ("Dixie Alley") and carry an Elevated severe-weather rating. Knoxville and Chattanooga are moderately lower risk due to hillier terrain. <strong>Charlotte, Raleigh, and Ashburn</strong> carry the lowest weather risk of the group — Mid-Atlantic and NC Piedmont locations see occasional hurricane remnants and nor'easters but no meaningful tornado corridor exposure.` },
+  ];
+
+  document.getElementById('summaryNarrative').innerHTML = paras
+    .map(p => `<div class="summary-para ${p.cls}">${p.text}</div>`).join('');
+
+  // Scorecard
+  const stateColors = { NC: 'var(--nc)', TN: 'var(--tn)', VA: 'var(--va)' };
+  const alphaSorted = [...lastResults].sort((a,b) => a.loc.name.localeCompare(b.loc.name));
+  const taxMax = Math.max(...lastResults.map(r => r.total));
+  const taxMin = Math.min(...lastResults.map(r => r.total));
+
+  function taxClass(total){
+    const pct = (total - taxMin) / (taxMax - taxMin || 1);
+    return pct > 0.66 ? 'tax-high' : pct > 0.33 ? 'tax-mid' : 'tax-low';
+  }
+  function scoreBadge(level, labels, colors){
+    const i = labels.indexOf(level);
+    const label = ['Low','Moderate','High','Elevated','Strong','Mid','Weak'][['low','moderate','high','elevated','strong','mid','weak'].indexOf(level)] || level;
+    return `<span class="sc-badge" style="background:${colors[i] || '#eee'};color:${i === 0 ? 'var(--ledger)' : i === 1 ? 'var(--brass)' : 'var(--rust)'}">${label}</span>`;
+  }
+
+  const HOSPBG = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+  const CRIMEBG = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+  const CLIMATEBG = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+  const DIVBG = ['#E3EFE6','#F3EBD9','#F4E4DD']; // high=green, moderate=amber, low=rust
+
+  const table = document.getElementById('scorecardTable');
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Est. Annual Tax</th>
+        <th>Home Price</th>
+        <th>Hospital</th>
+        <th>Crime</th>
+        <th>Weather</th>
+        <th>Diversity</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${alphaSorted.map(r => {
+        const loc = r.loc;
+        const hospColors = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+        const riskColors = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+        const divColors = ['#E3EFE6','#F3EBD9','#F4E4DD'];
+
+        const hospBadge = () => {
+          const map = {strong:{bg:'#E3EFE6',col:'var(--ledger)',lab:'Strong'}, mid:{bg:'#F3EBD9',col:'var(--brass)',lab:'Mid'}, weak:{bg:'#F4E4DD',col:'var(--rust)',lab:'Weak'}};
+          const m = map[loc.hosp] || map.mid;
+          return `<span class="sc-badge" style="background:${m.bg};color:${m.col}">${m.lab}</span>`;
+        };
+        const riskBadge = (level) => {
+          const map = {low:{bg:'#E3EFE6',col:'var(--ledger)',lab:'Low'}, moderate:{bg:'#F3EBD9',col:'var(--brass)',lab:'Moderate'}, elevated:{bg:'#F4E4DD',col:'var(--rust)',lab:'Elevated'}};
+          const m = map[level] || map.moderate;
+          return `<span class="sc-badge" style="background:${m.bg};color:${m.col}">${m.lab}</span>`;
+        };
+        const divBadge = () => {
+          const map = {high:{bg:'#E3EFE6',col:'var(--ledger)',lab:'High'}, moderate:{bg:'#F3EBD9',col:'var(--brass)',lab:'Moderate'}, low:{bg:'#F4E4DD',col:'var(--rust)',lab:'Low'}};
+          const m = map[loc.diversity] || map.moderate;
+          return `<span class="sc-badge" style="background:${m.bg};color:${m.col}">${m.lab}</span>`;
+        };
+
+        return `<tr class="${loc.isHome ? 'home-row' : ''}">
+          <td><span class="sc-loc">
+            <span class="state-tag tag-${loc.state.toLowerCase()}">${loc.state}</span>
+            ${loc.name} <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5b6359;">(${loc.state})</span>${loc.isHome ? ' &#9655;' : ''}
+          </span></td>
+          <td><span class="sc-tax ${taxClass(r.total)}">${fmt(r.total)}/yr</span></td>
+          <td><span style="font-family:'IBM Plex Mono',monospace;">${fmt(loc.home)}</span></td>
+          <td>${hospBadge()}</td>
+          <td>${riskBadge(loc.crime)}</td>
+          <td>${riskBadge(loc.climate)}</td>
+          <td>${divBadge()}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>`;
+}
+
+// ── HOMES ─────────────────────────────────────────────────────────────────────
+let lastHomesData = null; // cache so re-opening the tab doesn't re-fetch
+let lastHomesRefresh = null; // timestamp of last successful fetch
+
+function formatSheetDate(raw){
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (!isNaN(d.getTime())){
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  }
+  return raw; // already a formatted string, return as-is
+}
+
+function parseHomesJSON(jsonData){
+  // Normalize keys: trim whitespace so headers like "Utilities " still resolve
+  return jsonData.map(row => {
+    const r = {};
+    Object.keys(row).forEach(k => { r[k.trim()] = row[k]; });
+    return {
+      status:         (r['Status']            || r['Rejected'] || '').trim(),
+      salesCenter:    (r['Sales Center']      || '').trim(),
+      address:        (r['Address']           || '').trim(),
+      city:           (r['City']              || '').trim(),
+      locId:          (r['Location ID']       || '').trim().toLowerCase(),
+      community:      (r['Community']         || '').trim(),
+      builder:        (r['Builder']           || '').trim(),
+      model:          (r['Model']             || '').trim(),
+      style:          (r['Style']             || '').trim(),
+      enclosedWC:     (r['Enclosed WC']       || '').trim(),
+      utilities:      (r['Utilities']         || '').trim(),
+      kitchenApps:    (r['Kitchen Appliances']|| '').trim(),
+      price:          parseFloat((r['List Price']    || '0').replace(/[^0-9.]/g,'')) || 0,
+      upgradePrice:   parseFloat((r['Upgrade Price'] || '0').replace(/[^0-9.]/g,'')) || 0,
+      contact:        (r['Contact']           || '').trim(),
+      tel:            (r['Tel.#']             || '').trim(),
+      beds:           (r['Beds']              || '').trim(),
+      baths:          (r['Baths']             || '').trim(),
+      sqft:           (r['Sq Ft']             || '').trim(),
+      yearBuilt:      (r['Year Built']        || '').trim(),
+      hoa:            parseFloat((r['HOA/mo'] || '0').replace(/[^0-9.]/g,'')) || 0,
+      garage:         (r['Garage']            || '').trim(),
+      zillow:         (r['Zillow URL']        || '').trim(),
+      redfin:         (r['Redfin URL']        || '').trim(),
+      notes:          (r['Notes']             || '').trim(),
+      dateAdded:      formatSheetDate((r['Date Added']        || '').trim()),
+      dateVisited:    formatSheetDate((r['Date Visited']      || '').trim()),
+      rejectionReason:(r['Rejection Reason']  || '').trim(),
+    };
+  }).filter(h => h.address);
+}
+
+function statusBadgeHTML(status){
+  const s = (status || '').toLowerCase();
+  if (s === 'active')   return '<span class="status-badge-active">Active</span>';
+  if (s === 'pending')  return '<span class="status-badge-active" style="background:#F3EBD9;color:var(--brass);">Pending</span>';
+  if (s.includes('rejected') || s.includes('viewed')) return '<span class="status-badge-archive" style="background:#F4E4DD;color:var(--rust);">Rejected</span>';
+  return '<span class="status-badge-archive">Archived</span>';
+}
+
+function isArchived(status){
+  const s = (status || '').toLowerCase();
+  return s !== 'active' && s !== 'pending';
+}
+
+function homeCardHTML(h, cls=''){
+  const loc = LOCATIONS.find(l => l.id === h.locId);
+  const propTax = loc ? Math.round(h.price * loc.rate) : null;
+  const hoaAnnual = h.hoa ? h.hoa * 12 : 0;
+  const totalAnnual = (propTax || 0) + hoaAnnual;
+  const upgradedPrice = h.upgradePrice ? h.upgradePrice : null;
+
+  const locTag = loc
+    ? `<span class="state-tag tag-${loc.state.toLowerCase()}">${loc.state}</span> ${loc.name}`
+    : `<span style="color:var(--rust);font-size:12px;">⚠ Unknown location ID: "${h.locId}"</span>`;
+
+  const communityLine = [h.community, h.builder, h.model, h.style].filter(Boolean).join(' · ');
+
+  const badges = loc ? `
+    <div class="home-badges">
+      <span class="hosp-badge ${badgeClass(loc.hosp)}">${badgeLabel(loc.hosp)}</span>
+      <span class="hosp-badge ${riskBadgeClass(loc.crime)}">${riskBadgeLabel('Crime', loc.crime)}</span>
+      <span class="hosp-badge ${riskBadgeClass(loc.climate)}">${riskBadgeLabel('Weather', loc.climate)}</span>
+      <span class="hosp-badge ${diversityBadgeClass(loc.diversity)}">${diversityBadgeLabel(loc.diversity)}</span>
+    </div>` : '';
+
+  const costs = `
+    <div class="home-divider"></div>
+    <div class="home-cost-row"><span class="ck">Est. property tax/yr</span><span class="cv">${propTax !== null ? fmt(propTax) : '—'}</span></div>
+    <div class="home-cost-row"><span class="ck">HOA annual</span><span class="cv">${hoaAnnual ? fmt(hoaAnnual) : 'None'}</span></div>
+    ${upgradedPrice ? `<div class="home-cost-row"><span class="ck">Upgraded price</span><span class="cv">${fmt(upgradedPrice)}</span></div>` : ''}
+    <div class="home-cost-row total-row"><span class="ck">Total est. annual housing cost</span><span class="cv">${propTax !== null ? fmt(totalAnnual) : '—'}</span></div>`;
+
+  const links = (h.zillow || h.redfin) ? `<div class="home-links">
+    ${h.zillow ? `<a href="${h.zillow}" target="_blank" class="home-link-btn">Zillow ↗</a>` : ''}
+    ${h.redfin ? `<a href="${h.redfin}" target="_blank" class="home-link-btn">Redfin ↗</a>` : ''}
+  </div>` : '';
+
+  const contactLine = (h.contact || h.tel) ? `<div class="home-notes"><span style="font-weight:600;">Contact:</span> ${[h.contact, h.tel].filter(Boolean).join(' · ')}</div>` : '';
+
+  // Rejection reason shown prominently for rejected/archived
+  const s = (h.status || '').toLowerCase();
+  const rejectionBlock = h.rejectionReason && (s.includes('rejected') || s === 'archive')
+    ? `<div class="home-notes" style="border-left-color:var(--rust);background:#FDF3F1;"><span style="font-weight:600;color:var(--rust);">Rejected:</span> ${h.rejectionReason}</div>`
+    : '';
+  const notes = h.notes ? `<div class="home-notes">${h.notes}</div>` : '';
+  const meta = [h.dateAdded ? `Added ${h.dateAdded}` : '', h.dateVisited ? `Visited ${h.dateVisited}` : ''].filter(Boolean).join(' · ');
+
+  return `
+  <div class="home-card ${cls}" data-addr="${h.address.replace(/"/g,'&quot;')}">
+    <div class="home-card-head">
+      ${statusBadgeHTML(h.status)}
+      <div class="home-card-addr">${h.address}</div>
+      <div class="home-card-city">${locTag}</div>
+      ${communityLine ? `<div class="home-card-city" style="margin-top:3px;">${communityLine}</div>` : ''}
+      ${h.salesCenter && h.salesCenter !== h.address ? `<div class="home-card-city" style="margin-top:3px;color:#9aa193;">Sales center: ${h.salesCenter}</div>` : ''}
+      <div class="home-card-price">${fmt(h.price)}</div>
+    </div>
+    <div class="home-card-body">
+      <div class="home-stat-row">
+        ${h.beds     ? `<span class="home-stat"><span class="k">Beds</span> <span class="v">${h.beds}</span></span>` : ''}
+        ${h.baths    ? `<span class="home-stat"><span class="k">Baths</span> <span class="v">${h.baths}</span></span>` : ''}
+        ${h.sqft     ? `<span class="home-stat"><span class="k">SqFt</span> <span class="v">${parseInt(h.sqft).toLocaleString()}</span></span>` : ''}
+        ${h.yearBuilt ? `<span class="home-stat"><span class="k">Built</span> <span class="v">${h.yearBuilt}</span></span>` : ''}
+        ${h.hoa      ? `<span class="home-stat"><span class="k">HOA</span> <span class="v">${fmt(h.hoa)}/mo</span></span>` : '<span class="home-stat"><span class="k">HOA</span> <span class="v">None</span></span>'}
+        ${h.garage   ? `<span class="home-stat"><span class="k">Garage</span> <span class="v">${h.garage}</span></span>` : ''}
+      </div>
+      ${costs}
+      ${badges}
+      ${links}
+      ${contactLine}
+      ${rejectionBlock}
+      ${notes}
+      ${meta ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9aa193;margin-top:8px;">${meta}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function homesCompareCardHTML(h){
+  if (!h) return `<div class="compare3-card" style="background:#F8F9F6;border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;min-height:200px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9aa193;">No home selected</span></div>`;
+  const loc = LOCATIONS.find(l => l.id === h.locId);
+  const propTax = loc ? Math.round(h.price * loc.rate) : null;
+  const hoaAnnual = h.hoa * 12;
+  const totalAnnual = (propTax || 0) + hoaAnnual;
+  const mg = loc ? MEDIGAP[loc.state] : null;
+  const communityLine = [h.community, h.builder, h.model, h.style].filter(Boolean).join(' · ');
+  return `
+  <div class="compare3-card ${loc ? (loc.state === 'NC' ? 'nc' : loc.state === 'VA' ? 'va' : 'tn') : ''}">
+    <div class="c3-head">${h.address}<br>
+      <span style="font-size:11px;font-family:'IBM Plex Mono',sans-serif;font-weight:400;opacity:.85;">${h.city}${loc ? ' · ' + loc.name + ', ' + loc.state : ''}</span>
+      ${communityLine ? `<br><span style="font-size:10px;font-family:'IBM Plex Mono',sans-serif;font-weight:400;opacity:.75;">${communityLine}</span>` : ''}
+      ${h.salesCenter && h.salesCenter !== h.address ? `<br><span style="font-size:10px;font-family:'IBM Plex Mono',sans-serif;font-weight:400;opacity:.65;">Sales center: ${h.salesCenter}</span>` : ''}
+    </div>
+    <div class="c3-body">
+      <div class="c3-row"><span class="c3-label">List price</span><span class="c3-val">${fmt(h.price)}</span></div>
+      ${h.upgradePrice ? `<div class="c3-row"><span class="c3-label">Upgraded price</span><span class="c3-val">${fmt(h.upgradePrice)}</span></div>` : ''}
+      <div class="c3-row"><span class="c3-label">Beds / Baths</span><span class="c3-val">${h.beds || '—'} / ${h.baths || '—'}</span></div>
+      <div class="c3-row"><span class="c3-label">Square feet</span><span class="c3-val">${h.sqft ? parseInt(h.sqft).toLocaleString() : '—'}</span></div>
+      <div class="c3-row"><span class="c3-label">Year built</span><span class="c3-val">${h.yearBuilt || '—'}</span></div>
+      <div class="c3-row"><span class="c3-label">Garage</span><span class="c3-val">${h.garage || '—'}</span></div>
+      <div class="c3-row"><span class="c3-label">HOA / mo</span><span class="c3-val">${h.hoa ? fmt(h.hoa) : 'None'}</span></div>
+      <div class="c3-row"><span class="c3-label">Est. property tax / yr</span><span class="c3-val">${propTax !== null ? fmt(propTax) : '—'}</span></div>
+      <div class="c3-row"><span class="c3-label">HOA annual</span><span class="c3-val">${hoaAnnual ? fmt(hoaAnnual) : 'None'}</span></div>
+      <div class="c3-row" style="font-weight:700;"><span class="c3-label">Total est. annual cost</span><span class="c3-val" style="color:var(--ledger)">${propTax !== null ? fmt(totalAnnual) : '—'}</span></div>
+      ${mg ? `<div class="c3-row"><span class="c3-label">Medigap Plan G (state)</span><span class="c3-val">$${mg.low}–${mg.high}/mo</span></div>` : ''}
+            ${h.contact ? `<div class="c3-row"><span class="c3-label">Contact</span><span class="c3-val" style="font-size:11px;">${h.contact}${h.tel ? ' · ' + h.tel : ''}</span></div>` : ''}
+    </div>
+    ${loc ? `<div class="c3-badges">
+      <span class="hosp-badge ${badgeClass(loc.hosp)}" style="font-size:11px;">${badgeLabel(loc.hosp)}</span>
+      <span class="hosp-badge ${riskBadgeClass(loc.crime)}" style="font-size:11px;">${riskBadgeLabel('Crime',loc.crime)}</span>
+      <span class="hosp-badge ${riskBadgeClass(loc.climate)}" style="font-size:11px;">${riskBadgeLabel('Weather',loc.climate)}</span>
+      <span class="hosp-badge ${diversityBadgeClass(loc.diversity)}" style="font-size:11px;">${diversityBadgeLabel(loc.diversity)}</span>
+    </div>` : ''}
+    ${(h.zillow || h.redfin) ? `<div class="c3-badges">
+      ${h.zillow ? `<a href="${h.zillow}" target="_blank" class="home-link-btn">Zillow ↗</a>` : ''}
+      ${h.redfin ? `<a href="${h.redfin}" target="_blank" class="home-link-btn">Redfin ↗</a>` : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+let lastAllHomes = []; // full unfiltered set for filter dropdowns
+let homesView = 'cards'; // 'cards' or 'table'
+
+function setHomesView(view){
+  homesView = view;
+  document.getElementById('hvCards').classList.toggle('active', view === 'cards');
+  document.getElementById('hvTable').classList.toggle('active', view === 'table');
+  applyHomesFilter();
+}
+
+function buildHomesFilters(homes){
+  const cities = [...new Set(homes.map(h => h.city).filter(Boolean))].sort();
+  const builders = [...new Set(homes.map(h => h.builder).filter(Boolean))].sort();
+
+  const cityEl = document.getElementById('hfCity');
+  const currentCity = cityEl.value;
+  cityEl.innerHTML = '<option value="">All cities</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (cities.includes(currentCity)) cityEl.value = currentCity;
+
+  const builderEl = document.getElementById('hfBuilder');
+  const currentBuilder = builderEl.value;
+  builderEl.innerHTML = '<option value="">All builders</option>' + builders.map(b => `<option value="${b}">${b}</option>`).join('');
+  if (builders.includes(currentBuilder)) builderEl.value = currentBuilder;
+
+  document.getElementById('homesFilterBar').style.display = homes.length ? '' : 'none';
+}
+
+function applyHomesFilter(){
+  const city      = document.getElementById('hfCity').value;
+  const builder   = document.getElementById('hfBuilder').value;
+  const statusSel = document.getElementById('hfStatus').value; // 'active','all','rejected','archived'
+
+  let filtered = lastAllHomes.filter(h => {
+    const s = (h.status || '').toLowerCase();
+    const isActiveRow   = s === 'active';
+    const isPendingRow  = s === 'pending';
+    const isRejectedRow = s.includes('rejected') || s.includes('viewed');
+    const isArchivedRow = s === 'archive';
+
+    if (statusSel === 'active'         && !isActiveRow)                    return false;
+    if (statusSel === 'pending'         && !isPendingRow)                   return false;
+    if (statusSel === 'active_pending'  && !isActiveRow && !isPendingRow)   return false;
+    if (statusSel === 'rejected'        && !isRejectedRow)                  return false;
+    if (statusSel === 'archived'        && !isArchivedRow)                  return false;
+    // 'all' — no status filter
+    if (city    && h.city    !== city)    return false;
+    if (builder && h.builder !== builder) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    const rank = item => {
+      const s = (item.status || '').toLowerCase();
+      return s === 'active' ? 0 : s === 'pending' ? 1 : (s.includes('rejected') || s.includes('viewed')) ? 2 : 3;
+    };
+    return rank(a) - rank(b) || a.price - b.price;
+  });
+
+  const listEl = document.getElementById('homesListings');
+  const countTextEl = document.getElementById('homesFilterCountText');
+  const toggleEl = document.getElementById('homesViewToggle');
+
+  if (!filtered.length){
+    listEl.innerHTML = '<div class="homes-empty">No listings match the current filters.</div>';
+    if (countTextEl) countTextEl.textContent = '';
+    if (toggleEl) toggleEl.style.display = 'none';
+  } else {
+    const total = filtered.length;
+    const filterActive = city || builder || statusSel !== 'active';
+    const statusLabel = { active:'Active only', pending:'Pending only', active_pending:'Active + Pending', all:'All statuses', rejected:'Rejected only', archived:'Archived only' }[statusSel] || statusSel;
+    if (countTextEl) countTextEl.textContent = filterActive
+      ? `${total} listing${total!==1?'s':''} shown · ${statusLabel}${city?' · '+city:''}${builder?' · '+builder:''}`
+      : `${total} active listing${total!==1?'s':''}`;
+    if (toggleEl) toggleEl.style.display = '';
+
+    if (homesView === 'table'){
+      listEl.innerHTML = renderHomesTable(filtered);
+    } else {
+      listEl.innerHTML = `<div class="homes-grid">${filtered.map(h => {
+        const s = (h.status||'').toLowerCase();
+        const cls = s === 'archive' ? 'archived' : '';
+        return homeCardHTML(h, cls);
+      }).join('')}</div>`;
+    }
+  }
+
+  // Update comparison selects with current active listings
+  const active = filtered.filter(h => (h.status||'').toLowerCase() === 'active');
+  const compareSection = document.getElementById('homesCompareSection');
+  if (active.length >= 2){
+    compareSection.style.display = '';
+    const noneOpt = '<option value="">— none —</option>';
+    const opts = active.map((h,i) => {
+      const label = [h.address.split(',')[0], h.community, h.builder].filter(Boolean).join(' — ');
+      return `<option value="${i}">${label} (${fmt(h.price)})</option>`;
+    }).join('');
+    ['hcSelA','hcSelB','hcSelC'].forEach((id, i) => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      sel.innerHTML = noneOpt + opts;
+      sel.value = i < active.length ? String(i) : '';
+      sel.onchange = () => renderHomesCompare(active);
+    });
+    renderHomesCompare(active);
+  } else {
+    compareSection.style.display = 'none';
+  }
+}
+
+function renderHomes(homes){
+  lastAllHomes = homes;
+
+  // Hero stats (always based on all active, ignoring filters)
+  const allActive = homes.filter(h => (h.status||'').toLowerCase() === 'active').sort((a,b) => a.price - b.price);
+  const heroEl = document.getElementById('homesHero');
+  if (homes.length){
+    const archived = homes.filter(h => isArchived(h.status));
+    const cheapest = allActive[0];
+    const avg = allActive.length ? Math.round(allActive.reduce((s,h) => s+h.price, 0) / allActive.length) : 0;
+    heroEl.innerHTML = `
+      <div class="homes-hero-stat"><div class="num">${cheapest ? fmt(cheapest.price) : '—'}</div><div class="lab">Cheapest active — ${cheapest ? cheapest.address.split(',')[0] : '—'}</div></div>
+      <div class="homes-hero-stat"><div class="num">${avg ? fmt(avg) : '—'}</div><div class="lab">Average list price (${allActive.length} active)</div></div>
+      <div class="homes-hero-stat"><div class="num">${homes.length}</div><div class="lab">Total listings (${archived.length} archived / rejected)</div></div>`;
+    heroEl.style.display = '';
+  }
+
+  buildHomesFilters(homes);
+  applyHomesFilter();
+}
+
+function renderHomesCompare(active){
+  const grid = document.getElementById('homesCompareGrid');
+  const picks = ['hcSelA','hcSelB','hcSelC'].map(id => {
+    const sel = document.getElementById(id);
+    const val = sel ? sel.value : '';
+    return val !== '' ? active[parseInt(val)] : null;
+  });
+  grid.innerHTML = picks.map(h => homesCompareCardHTML(h)).join('');
+}
+
+function fmtTimestamp(d){
+  if (!d) return 'never';
+  return d.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' at ' +
+    d.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+}
+
+async function loadHomes(forceRefresh){
+  if (lastHomesData && !forceRefresh){
+    renderHomes(lastHomesData);
+    return;
+  }
+  const statusEl = document.getElementById('homesStatus');
+
+  if (!HOMES_API_URL || HOMES_API_URL === 'PASTE_APPS_SCRIPT_URL_HERE'){
+    statusEl.innerHTML = `<div class="homes-error">
+      Apps Script URL not yet configured. Follow the setup steps to deploy the Google Apps Script Web App, then paste the URL into the <code>HOMES_API_URL</code> constant at the top of index.html.
+    </div>`;
+    return;
+  }
+
+  statusEl.innerHTML = '<div class="homes-loading">Loading listings from Google Sheets…</div>';
+  document.getElementById('homesHero').style.display = 'none';
+  document.getElementById('homesListings').innerHTML = '';
+  const _ct = document.getElementById('homesFilterCountText');
+  if (_ct) _ct.textContent = '';
+  const _tog = document.getElementById('homesViewToggle');
+  if (_tog) _tog.style.display = 'none';
+  document.getElementById('homesFilterBar').style.display = 'none';
+  document.getElementById('homesCompareSection').style.display = 'none';
+
+  try {
+    const res = await fetch(HOMES_API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const jsonData = await res.json();
+    const homes = parseHomesJSON(jsonData);
+    lastHomesData = homes;
+    lastHomesRefresh = new Date();
+    statusEl.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9aa193;margin-bottom:12px;">
+      ${homes.length} listing${homes.length !== 1 ? 's' : ''} loaded &middot; Last refreshed: ${fmtTimestamp(lastHomesRefresh)} &middot;
+      <button onclick="loadHomes(true)" style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:none;color:var(--brass);cursor:pointer;text-decoration:underline;padding:0;">Refresh now</button>
+    </div>`;
+    renderHomes(homes);
+  } catch(e){
+    statusEl.innerHTML = `<div class="homes-error">
+      Could not load listings — ${e.message}.<br><br>
+      Make sure the Google Apps Script is deployed with <strong>Access: Anyone</strong> and the URL in <code>HOMES_API_URL</code> is correct, then
+      <button onclick="loadHomes(true)" style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:none;border:none;color:var(--rust);cursor:pointer;text-decoration:underline;padding:0;font-weight:600;">try again</button>.
+    </div>`;
+    lastHomesData = null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderHomesTable(filtered){
+  if (!filtered.length){
+    return '<div class="homes-empty">No listings match the current filters.</div>';
+  }
+  const rows = filtered.map(h => {
+    const wcCell = h.enclosedWC
+      ? (h.enclosedWC.toLowerCase() === 'yes'
+          ? `<span class="td-wc-yes">Yes</span>`
+          : `<span class="td-wc-no">No</span>`)
+      : '<span style="color:#ccc;">—</span>';
+    const addrLine = (h.address.split(',')[0] || '').trim();
+    const communityLine = [h.community, h.city].filter(Boolean).join(' · ');
+    const builderModel = [h.builder, h.model].filter(Boolean).join(' · ');
+    const statusClass = (h.status||'').toLowerCase().includes('reject') ? 'style="opacity:.6;"' : '';
+    const visitedBadge = h.dateVisited
+      ? `<span class="visited-badge" onclick="this.classList.toggle('show')">✓<span class="vdate">${h.dateVisited}</span></span>`
+      : '';
+    const jumpBtn = `<button class="jump-card-btn" data-addr="${h.address.replace(/"/g,'&quot;')}" title="View card">⊞</button>`;
+    return `<tr ${statusClass}>
+      <td class="td-addr">${addrLine}${visitedBadge}${jumpBtn}<span class="td-community">${communityLine}</span></td>
+      <td>${builderModel || '—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${h.sqft ? parseInt(h.sqft).toLocaleString() : '—'}</td>
+      <td class="td-link">${h.zillow ? `<a href="${h.zillow}" target="_blank">View ↗</a>` : '—'}</td>
+      <td class="td-notes" onclick="if(this.textContent.trim())this.classList.toggle('expanded')">${h.notes || ''}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="homes-table-wrap">
+    <table class="homes-table">
+      <thead><tr>
+        <th>Address · Location</th>
+        <th>Builder · Model</th>
+        <th>Sq Ft</th>
+        <th>Zillow</th>
+        <th>Notes <span style="font-weight:400;opacity:.6;font-size:10px;">(click to expand)</span></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function jumpToHomeCard(addr){
+  setHomesView('cards');
+  // give the card view one render cycle to appear before scrolling
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const card = Array.from(document.querySelectorAll('.home-card'))
+      .find(c => c.dataset.addr === addr);
+    if (!card) return;
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+    card.classList.remove('highlight');
+    void card.offsetWidth; // restart animation
+    card.classList.add('highlight');
+  }));
+}
+
+// delegated click for jump-to-card buttons (avoids per-row listener issues)
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.jump-card-btn');
+  if (btn) jumpToHomeCard(btn.dataset.addr);
+});
+
+// ── REQUIREMENTS ─────────────────────────────────────────────────────────────
+const REQUIREMENTS = [
+  { section:'Overall', items:[
+    { text:'New construction only',                                              tracked:null },
+    { text:'Within 1 hour of Nashville Airport (BNA)',                          tracked:null },
+    { text:'Mt. Juliet preferred; Lebanon/Wilson County acceptable',            tracked:null },
+    { text:'Not a 55+ / age-restricted community',                              tracked:null },
+    { text:'3BR, 2+ Bath',                                                      tracked:'listings', field:'Beds / Baths' },
+    { text:'Flex room',                                                          tracked:'tour',     field:'Flex Room' },
+    { text:'Covered porch',                                                      tracked:'tour',     field:'Covered Porch' },
+    { text:'Covered patio',                                                      tracked:'tour',     field:'Covered Patio' },
+    { text:'2-car garage',                                                       tracked:'listings', field:'Garage' },
+    { text:'Separate laundry room AND mud room',                                 tracked:'tour',     field:'Separate Mud Room' },
+    { text:'20\'+ side setback between homes',                                   tracked:'tour',     field:'House Spacing' },
+    { text:'Minimum lot size: 0.2 acre (~8,700 sq ft)',                         tracked:'tour',     field:'Lot Size (sq ft)' },
+    { text:'Max budget: $525,000',                                               tracked:'listings', field:'List Price' },
+    { text:'Not adjacent to data center campuses',                               tracked:null },
+    { text:'HOA: evaluate case by case; flag anything over $150/mo',            tracked:'tour',     field:'HOA Monthly' },
+  ]},
+  { section:'Utilities', items:[
+    { text:'Gas preferred, or combination gas + electric',                       tracked:'tour',     field:'Utilities' },
+  ]},
+  { section:'Owner\'s Suite', items:[
+    { text:'Enclosed water closet',                                              tracked:'tour',     field:'Enclosed WC' },
+    { text:'Fully tiled shower (tub not necessary)',                             tracked:'tour',     field:'Shower Type / Tub Included' },
+    { text:'Curbless / zero-threshold shower entry (aging-in-place)',           tracked:'tour',     field:'Curbless / Zero-Threshold Shower' },
+    { text:'Walk-in closet',                                                     tracked:'tour',     field:'Walk-in Closet' },
+    { text:'Blocking in bath walls for future grab bars (if offered at no cost)',tracked:'tour',    field:'Grab Bar Blocking Available' },
+  ]},
+  { section:'Kitchen', items:[
+    { text:'Walk-in pantry',                                                     tracked:'tour',     field:'Walk-in Pantry' },
+    { text:'Appliance layout: wall oven + separate microwave (NOT over-range)',  tracked:'tour',     field:'Cooking Appliances Layout' },
+    { text:'Large island',                                                       tracked:'tour',     field:'Large Island' },
+    { text:'Stainless steel appliances',                                         tracked:null },
+    { text:'Room Choices / layout flexibility offered by builder',               tracked:'tour',     field:'Room Choice / Layout Flexibility' },
+  ]},
+  { section:'Accessibility / Aging-in-Place', items:[
+    { text:'Zero-step entry from garage',                                        tracked:'tour',     field:'Zero-Step Entry (Garage)' },
+    { text:'Zero-step / no-threshold entry from front door',                     tracked:'tour',     field:'Zero-Step Entry (Front Door)' },
+    { text:'Wider interior doorways / hallways (32"+ where available)',          tracked:'tour',     field:'Wider Doorways / Hallways (32"+)' },
+  ]},
+  { section:'Builder Questions', items:[
+    { text:'EV charger: 240V outlet / prewire in garage',                        tracked:'tour',     field:'EV Charger / 240V Prewire in Garage' },
+    { text:'GFCI outlet near owner\'s suite toilet (for future bidet install)',  tracked:'tour',     field:'GFCI Outlet Near Owner\'s Suite Toilet' },
+  ]},
+  { section:'Builder Vetting', items:[
+    { text:'GuildQuality-verified recommendation rate >85%',                     tracked:'tour',     field:'GuildQuality Score (%)' },
+    { text:'Builder provides 2–3 recent local buyer references',                 tracked:'tour',     field:'Buyer References Provided' },
+    { text:'Minimum warranty: 1yr workmanship / 2yr systems / 10yr structural', tracked:'tour',     field:'Warranty Terms' },
+  ]},
+];
+
+const RULED_OUT = [
+  { name:'Smith Douglas ranch plans (Pearson, Reynolds, Crawford, Piedmont, Landen)', reason:'Pantry too small or not currently offered in Mt. Juliet/Nashville market' },
+  { name:"Beazer's Finley — Bradshaw Farms, Mt. Juliet",                             reason:'Over budget ($559,990+)' },
+  { name:'Stonebridge — Goodall Homes, Lebanon',                                      reason:'55+ ambiguity' },
+  { name:'Ravens Crest — Lennar, Gladeville/Mt. Juliet line',                         reason:'No ranch plans' },
+  { name:'Mt. Juliet single-family under $500K',                                      reason:"Doesn't currently exist in the market" },
+  { name:"Thompson's Station",                                                         reason:'Over budget and outside 1-hr BNA radius' },
+  { name:'The Courtyards at Franklin Road / Del Webb Southern Harmony — Murfreesboro',reason:'Over budget and/or 55+' },
+  { name:"Meritage's 2,055 sq ft Bradley plan — Sycamore Grove",                     reason:'Story count unconfirmed, superseded by Bledsoe' },
+];
+
+function renderRequirements(){
+  const el = document.getElementById('reqContent');
+  if (!el) return;
+
+  // Requirements checklist
+  const reqHTML = REQUIREMENTS.map(sec => {
+    const itemsHTML = sec.items.map(item => {
+      const badgeCls = item.tracked === 'tour' ? 'req-tour' : item.tracked === 'listings' ? 'req-listings' : 'req-untracked';
+      const badgeLabel = item.tracked === 'tour' ? 'Tour Notes' : item.tracked === 'listings' ? 'Listings' : 'Not captured';
+      const hint = item.field ? `<div class="req-field-hint">→ ${item.field}</div>` : '';
+      return `<div class="req-item">
+        <div class="req-text">${item.text}${hint}</div>
+        <span class="req-badge ${badgeCls}">${badgeLabel}</span>
+      </div>`;
+    }).join('');
+    return `<div class="req-section">
+      <div class="req-section-title">${sec.section}</div>
+      ${itemsHTML}
+    </div>`;
+  }).join('');
+
+  // Active/Pending candidates from Home Listings
+  const candidates = (lastHomesData || [])
+    .filter(h => !isArchived(h.status))
+    .sort((a,b) => a.price - b.price);
+  const candHTML = candidates.length
+    ? `<div class="req-candidates-grid">${candidates.map(h => {
+        const loc = LOCATIONS.find(l => l.id === h.locId);
+        const isPending = (h.status||'').toLowerCase() === 'pending';
+        const link = h.zillow ? `<a href="${h.zillow}" target="_blank" class="req-candidate-link">View ↗</a>` : '';
+        return `<div class="req-candidate-card ${isPending?'pending':''}">
+          <div class="req-candidate-name">${h.address.split(',')[0]}</div>
+          <div class="req-candidate-meta">${[h.builder, h.model, h.community].filter(Boolean).join(' · ')}</div>
+          <div class="req-candidate-meta">${loc ? loc.name + ', ' + loc.state : h.city}</div>
+          <div class="req-candidate-price">${fmt(h.price)}</div>
+          ${h.notes ? `<div class="req-candidate-open">${h.notes}</div>` : ''}
+          ${link}
+        </div>`;
+      }).join('')}</div>`
+    : '<div class="homes-empty">No active/pending listings — add candidates to the Home Listings sheet.</div>';
+
+  // Ruled out
+  const ruledHTML = RULED_OUT.map(r => `
+    <div class="ruled-out-item">
+      <div class="ro-name">${r.name}</div>
+      <div class="ro-reason">${r.reason}</div>
+    </div>`).join('');
+
+  el.innerHTML = reqHTML
+    + `<div class="req-section"><div class="req-section-title">Active Candidates</div>${candHTML}</div>`
+    + `<div class="req-section"><div class="req-section-title">Ruled Out</div>${ruledHTML}</div>`;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── TOUR NOTES ───────────────────────────────────────────────────────────────
+const TOUR_API_URL = HOMES_API_URL + '?type=tour';
+let lastTourData = null;
+let tourView = 'scorecard';
+
+const TOUR_COMPARE_ROWS = [
+  [null,  'Owner\'s Suite'],
+  ['primarySuiteNotes',  'Suite Notes',              'notes'],
+  ['enclosedWC',         'Enclosed WC',              'yesno'],
+  ['tubIncluded',        'Tub Included',             'yesno_neg'],
+  ['showerType',         'Shower Type',              'text'],
+  ['curblessShower',     'Curbless Shower Entry',    'yesno'],
+  ['walkInCloset',       'Walk-in Closet',           'yesno'],
+  ['grabBarBlocking',    'Grab Bar Blocking',        'text'],
+  ['primaryBathNotes',   'Bath Notes',               'notes'],
+  [null,  'Kitchen'],
+  ['cookingAppliances',  'Cooking Appliances',       'multiselect'],
+  ['walkInPantry',       'Walk-in Pantry',           'yesno'],
+  ['largeIsland',        'Large Island',             'yesno'],
+  ['roomChoiceFlex',     'Room Choice / Flex',       'yesno'],
+  ['kitchenUpgrade',     'Upgrade Package Avail.',   'yesno'],
+  ['kitchenUpgradeNotes','Upgrade Notes',            'notes'],
+  ['kitchenNotes',       'Kitchen Notes',            'notes'],
+  [null,  'Utilities & Package'],
+  ['utilities',          'Utilities',                'text'],
+  ['blindsIncluded',     'Blinds',                   'yesno'],
+  ['recessedLighting',   'Recessed Lighting',        'yesno'],
+  ['ceilingFans',        'Ceiling Fans',             'yesno'],
+  ['appliancesIncluded', 'Appliances Included',      'multiselect'],
+  ['packageNotes',       'Package Notes',            'notes'],
+  [null,  'HOA'],
+  ['hoaMonthly',         'Monthly Fee',              'text'],
+  ['hoaIncludes',        'What\'s Included',         'notes'],
+  [null,  'Additional Features'],
+  ['flexRoom',           'Flex Room',                'yesno'],
+  ['powderRoom',         'Powder Room',              'yesno'],
+  ['laundryTub',         'Laundry Tub',              'yesno'],
+  ['bidetAvailable',     'Bidet Available',          'yesno'],
+  [null,  'Accessibility / Aging-in-Place'],
+  ['zeroStepFront',      'Zero-Step (Front Door)',   'yesno'],
+  ['zeroStepGarage',     'Zero-Step (Garage)',       'yesno'],
+  ['widerDoorways',      'Wider Doorways (32"+)',    'yesno'],
+  [null,  'Lot & Exterior'],
+  ['coveredPorch',       'Covered Porch',            'yesno'],
+  ['coveredPatio',       'Covered Patio',            'yesno'],
+  ['separateMudRoom',    'Separate Mud Room',        'yesno'],
+  ['houseSize',          'House Size (sq ft)',       'text'],
+  ['lotSize',            'Lot Size (sq ft)',         'text'],
+  ['houseSpacing',       'House Spacing',            'text'],
+  ['exteriorNote',       'Exterior Notes',           'notes'],
+  [null,  'Builder Questions'],
+  ['evCharger',          'EV Charger / 240V',        'text'],
+  ['gfciOutlet',         'GFCI Outlet (bidet)',      'text'],
+  [null,  'Builder Vetting'],
+  ['builderReputation',  'Builder Reputation',       'notes'],
+  ['guildQualityScore',  'GuildQuality Score',       'text'],
+  ['buyerReferences',    'Buyer References',         'text'],
+  ['warrantyTerms',      'Warranty Terms',           'notes'],
+  [null,  'Overall'],
+  ['overallImpression',  'Impression',               'notes'],
+  ['pros',               'Pros',                     'notes'],
+  ['cons',               'Cons',                     'notes'],
+  ['decision',           'Decision',                 'decision'],
+  ['decisionNotes',      'Decision Notes',           'notes'],
+];
+
+function parseTourNotes(jsonData){
+  return jsonData.map(row => {
+    const r = {};
+    // key normalization: trim + last-wins for duplicates (cols 10/37, 17/38/57)
+    Object.keys(row).forEach(k => { r[k.trim()] = row[k]; });
+    return {
+      timestamp:           formatSheetDate((r['Timestamp']                                        || '').trim()),
+      homeId:              (r['Home Identification']                                              || '').trim(),
+      community:           (r['Community']                                                        || '').trim(),
+      address:             (r['Address']                                                          || '').trim(),
+      visitDate:           formatSheetDate((r['Visit Date']                                       || '').trim()),
+      // Owner's Suite
+      primarySuiteNotes:   (r['Primary Suite Notes']                                             || '').trim(),
+      enclosedWC:          (r['Enclosed WC']                                                     || '').trim(),
+      tubIncluded:         (r['Tub Included']                                                    || '').trim(),
+      showerType:          (r['Shower Type']                                                     || '').trim(),
+      primaryBathNotes:    (r['Primary Bath Notes']                                              || '').trim(),
+      walkInCloset:        (r['Walk-in Closet']                                                  || '').trim(),
+      curblessShower:      (r['Curbless / Zero-Threshold Shower']                               || '').trim(),
+      grabBarBlocking:     (r['Grab Bar Blocking Available']                                     || '').trim(),
+      // Kitchen — col 37 "Cooking Appliance Layout" wins over col 10 "Cooking Appliances Layout"
+      cookingAppliances:   (r['Cooking Appliance Layout'] || r['Cooking Appliances Layout']      || '').trim(),
+      walkInPantry:        (r['Walk-in Pantry']                                                  || '').trim(),
+      largeIsland:         (r['Large Island']                                                    || '').trim(),
+      roomChoiceFlex:      (r['Room Choice / Layout Flexibility']                               || '').trim(),
+      kitchenNotes:        (r['Kitchen Notes']                                                   || '').trim(),
+      kitchenUpgrade:      (r['Kitchen Upgrade Package Available']                              || '').trim(),
+      kitchenUpgradeNotes: (r['Kitchen Upgrade Notes']                                          || '').trim(),
+      // Utilities & Package
+      utilities:           (r['Utilities']                                                       || '').trim(),
+      blindsIncluded:      (r['Blinds Included']                                                || '').trim(),
+      recessedLighting:    (r['Recessed Lighting']                                              || '').trim(),
+      ceilingFans:         (r['Ceiling Fans']                                                   || '').trim(),
+      appliancesIncluded:  (r['Appliances Included']                                            || '').trim(),
+      packageNotes:        (r['Package Notes']                                                  || '').trim(),
+      // HOA
+      hoaMonthly:          (r['HOA Monthly']                                                    || '').trim(),
+      hoaIncludes:         (r['HOA Includes']                                                   || '').trim(),
+      // Additional Features
+      flexRoom:            (r['Flex Room']                                                       || '').trim(),
+      powderRoom:          (r['Powder Room']                                                     || '').trim(),
+      laundryTub:          (r['Laundry Tub']                                                    || '').trim(),
+      bidetAvailable:      (r['Bidet Available']                                                || '').trim(),
+      // Accessibility
+      zeroStepFront:       (r['Zero-Step Entry (Front Door)']                                   || '').trim(),
+      zeroStepGarage:      (r['Zero-Step Entry (Garage)']                                       || '').trim(),
+      widerDoorways:       (r['Wider Doorways / Hallways (32"+)']                              || '').trim(),
+      // Lot & Exterior
+      coveredPorch:        (r['Covered Porch']                                                   || '').trim(),
+      coveredPatio:        (r['Covered Patio']                                                   || '').trim(),
+      separateMudRoom:     (r['Separate Mud Room']                                              || '').trim(),
+      lotSize:             (r['Lot Size (sq ft)']                                               || '').trim(),
+      houseSize:           (r['House Size (sq ft)']                                             || '').trim(),
+      houseSpacing:        (r['House Spacing']                                                  || '').trim(),
+      exteriorNote:        (r['Exterior Note']                                                  || '').trim(),
+      // Builder Questions
+      evCharger:           (r['EV Charger / 240V Prewire in Garage']                           || '').trim(),
+      gfciOutlet:          (r["GFCI Outlet Near Owner's Suite Toilet (for bidet)"]           || '').trim(),
+      // Builder Vetting
+      builderReputation:   (r['Builder Reputation']                                             || '').trim(),
+      guildQualityScore:   (r['GuildQuality Score (%)']                                        || '').trim(),
+      buyerReferences:     (r['Buyer References Provided']                                      || '').trim(),
+      warrantyTerms:       (r['Warranty Terms (e.g. workmanship, systems, structural)']        || '').trim(),
+      // Overall
+      overallImpression:   (r['Overall Impression']                                             || '').trim(),
+      pros:                (r['Pros']                                                            || '').trim(),
+      cons:                (r['Cons']                                                            || '').trim(),
+      decision:            (r['Decision']                                                        || '').trim(),
+      decisionNotes:       (r['Decision Notes']                                                 || '').trim(),
+      // Col 52 "Builder Vetting" ignored — section header, always empty
+    };
+  }).filter(t => t.homeId);
+}
+
+function tourFieldHTML(val, type){
+  if (!val) return '<span style="color:#ccc;">—</span>';
+  if (type === 'yesno'){
+    return val.toLowerCase() === 'yes'
+      ? '<span class="tf-yes">✓ Yes</span>'
+      : '<span class="tf-no">✗ No</span>';
+  }
+  if (type === 'yesno_neg'){
+    return val.toLowerCase() === 'yes'
+      ? '<span class="tf-neg">✗ Yes</span>'
+      : '<span class="tf-yes">✓ No</span>';
+  }
+  if (type === 'multiselect'){
+    const items = val.split(',').map(s => s.trim()).filter(Boolean);
+    return items.length > 1
+      ? items.map(i => `<div style="font-size:12px;">• ${i}</div>`).join('')
+      : val;
+  }
+  if (type === 'decision'){
+    const v = val.toLowerCase();
+    const cls = v === 'active' ? 'tdb-active' : v === 'pending' ? 'tdb-pending' : 'tdb-rejected';
+    return `<span class="tour-decision-badge ${cls}">${val}</span>`;
+  }
+  if (type === 'notes') return `<div class="tour-notes-block">${val}</div>`;
+  return val;
+}
+
+function tourCellHTML(val, type){
+  if (!val) return '<span style="color:#ccc;font-style:italic;">—</span>';
+  if (type === 'yesno'){
+    return val.toLowerCase() === 'yes' ? `<span class="tc-yes">✓ Yes</span>` : `<span class="tc-no">✗ No</span>`;
+  }
+  if (type === 'yesno_neg'){
+    return val.toLowerCase() === 'yes' ? `<span class="tc-neg">✗ Yes</span>` : `<span class="tc-good">✓ No</span>`;
+  }
+  if (type === 'multiselect'){
+    const items = val.split(',').map(s => s.trim()).filter(Boolean);
+    return items.map(i => `<div style="font-size:11px;">• ${i}</div>`).join('');
+  }
+  if (type === 'decision'){
+    const v = val.toLowerCase();
+    const cls = v === 'active' ? 'tdb-active' : v === 'pending' ? 'tdb-pending' : 'tdb-rejected';
+    return `<span class="tour-decision-badge ${cls}">${val}</span>`;
+  }
+  return val;
+}
+
+function tourCardHTML(t, idx){
+  const dec = (t.decision || '').toLowerCase();
+  const cardCls = dec === 'rejected' ? 'rejected' : dec === 'pending' ? 'pending' : '';
+  const tourKey = `${t.homeId}|${t.visitDate}`;
+  const idxAttr = ` data-tourkey="${tourKey.replace(/"/g,'&quot;')}"`;
+
+  const SECS = [
+    { label:"Owner's Suite", rows:[
+      { label:'Notes',                  val:t.primarySuiteNotes, type:'notes'    },
+      { label:'Enclosed WC',            val:t.enclosedWC,        type:'yesno'    },
+      { label:'Tub Included',           val:t.tubIncluded,       type:'yesno_neg'},
+      { label:'Shower Type',            val:t.showerType,        type:'text'     },
+      { label:'Curbless Shower Entry',  val:t.curblessShower,    type:'yesno'    },
+      { label:'Walk-in Closet',         val:t.walkInCloset,      type:'yesno'    },
+      { label:'Grab Bar Blocking',      val:t.grabBarBlocking,   type:'text'     },
+      { label:'Bath Notes',             val:t.primaryBathNotes,  type:'notes'    },
+    ]},
+    { label:'Kitchen', rows:[
+      { label:'Cooking Appliances',        val:t.cookingAppliances,   type:'multiselect'},
+      { label:'Walk-in Pantry',            val:t.walkInPantry,        type:'yesno'     },
+      { label:'Large Island',              val:t.largeIsland,         type:'yesno'     },
+      { label:'Room Choice / Flex',        val:t.roomChoiceFlex,      type:'yesno'     },
+      { label:'Upgrade Package Available', val:t.kitchenUpgrade,      type:'yesno'     },
+      { label:'Upgrade Notes',             val:t.kitchenUpgradeNotes, type:'notes'     },
+      { label:'Notes',                     val:t.kitchenNotes,        type:'notes'     },
+    ]},
+    { label:'Utilities & Package', rows:[
+      { label:'Utilities',         val:t.utilities,          type:'text'      },
+      { label:'Blinds',            val:t.blindsIncluded,     type:'yesno'     },
+      { label:'Recessed Lighting', val:t.recessedLighting,   type:'yesno'     },
+      { label:'Ceiling Fans',      val:t.ceilingFans,        type:'yesno'     },
+      { label:'Appliances',        val:t.appliancesIncluded, type:'multiselect'},
+      { label:'Notes',             val:t.packageNotes,       type:'notes'     },
+    ]},
+    { label:'HOA', rows:[
+      { label:'Monthly', val:t.hoaMonthly ? `$${t.hoaMonthly}/mo` : '', type:'text' },
+      { label:'Includes', val:t.hoaIncludes, type:'notes' },
+    ]},
+    { label:'Additional Features', rows:[
+      { label:'Flex Room',       val:t.flexRoom,       type:'yesno'},
+      { label:'Powder Room',     val:t.powderRoom,     type:'yesno'},
+      { label:'Laundry Tub',    val:t.laundryTub,     type:'yesno'},
+      { label:'Bidet Available', val:t.bidetAvailable, type:'yesno'},
+    ]},
+    { label:'Accessibility / Aging-in-Place', rows:[
+      { label:'Zero-Step Entry (Front Door)', val:t.zeroStepFront,  type:'yesno'},
+      { label:'Zero-Step Entry (Garage)',     val:t.zeroStepGarage, type:'yesno'},
+      { label:'Wider Doorways (32"+)',        val:t.widerDoorways,  type:'yesno'},
+    ]},
+    { label:'Lot & Exterior', rows:[
+      { label:'Covered Porch',  val:t.coveredPorch,    type:'yesno'},
+      { label:'Covered Patio',  val:t.coveredPatio,    type:'yesno'},
+      { label:'Separate Mud Room', val:t.separateMudRoom, type:'yesno'},
+      { label:'House Size',     val:t.houseSize,       type:'text' },
+      { label:'Lot Size',       val:t.lotSize,         type:'text' },
+      { label:'House Spacing',  val:t.houseSpacing,    type:'text' },
+      { label:'Notes',          val:t.exteriorNote,    type:'notes'},
+    ]},
+    { label:'Builder Questions', rows:[
+      { label:'EV Charger / 240V Prewire', val:t.evCharger,  type:'text'},
+      { label:'GFCI Outlet (bidet)',        val:t.gfciOutlet, type:'text'},
+    ]},
+    { label:'Builder Vetting', rows:[
+      { label:'Reputation',        val:t.builderReputation, type:'notes'},
+      { label:'GuildQuality Score',val:t.guildQualityScore, type:'text' },
+      { label:'Buyer References',  val:t.buyerReferences,  type:'text' },
+      { label:'Warranty Terms',    val:t.warrantyTerms,    type:'notes'},
+    ]},
+    { label:'Overall', rows:[
+      { label:'Impression', val:t.overallImpression, type:'notes'},
+      { label:'Pros',       val:t.pros,              type:'notes'},
+      { label:'Cons',       val:t.cons,              type:'notes'},
+    ]},
+  ];
+
+  const sectHTML = SECS.map(sec => {
+    const hasContent = sec.rows.some(r => r.val);
+    if (!hasContent) return '';
+    const rowsHTML = sec.rows.map(r => {
+      if (!r.val) return '';
+      if (r.type === 'notes' || r.type === 'multiselect')
+        return `<div class="tour-field" style="flex-direction:column;align-items:flex-start;"><span class="tf-label">${r.label}</span>${tourFieldHTML(r.val, r.type)}</div>`;
+      return `<div class="tour-field"><span class="tf-label">${r.label}</span><span class="tf-val">${tourFieldHTML(r.val, r.type)}</span></div>`;
+    }).join('');
+    return `<div class="tour-sec"><div class="tour-sec-label">${sec.label}</div>${rowsHTML}</div>`;
+  }).join('');
+
+  const decCls = dec === 'active' ? 'tdb-active' : dec === 'pending' ? 'tdb-pending' : 'tdb-rejected';
+  const decBadge = t.decision ? `<span class="tour-decision-badge ${decCls}">${t.decision}</span>` : '';
+  const decNotes = t.decisionNotes ? `<div class="tour-notes-block" style="margin-top:6px;">${t.decisionNotes}</div>` : '';
+  const addrLine = t.address ? `<div class="tour-card-meta" style="font-size:11px;">${t.address}</div>` : '';
+
+  return `
+  <div class="tour-card ${cardCls}"${idxAttr}>
+    <div class="tour-card-head">
+      <div class="tour-card-home">${t.homeId}</div>
+      <div class="tour-card-meta">${[t.community, t.visitDate ? 'Visited ' + t.visitDate : ''].filter(Boolean).join(' · ')}</div>
+      ${addrLine}
+      <div style="margin-top:6px;">${decBadge}</div>
+      ${decNotes}
+    </div>
+    <div class="tour-card-body">${sectHTML}</div>
+  </div>`;
+}
+
+
+function buildTourCompareSelects(tours){
+  const noneOpt = '<option value="">— none —</option>';
+  const opts = tours.map((t,i) => `<option value="${i}">${t.homeId}${t.visitDate ? ' · ' + t.visitDate : ''}</option>`).join('');
+  ['tcSelA','tcSelB','tcSelC'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Preserve selection by matching homeId+visitDate rather than positional index
+    const prevIdx = el.value !== '' ? parseInt(el.value) : -1;
+    const prevKey = prevIdx >= 0 && tours[prevIdx] ? `${tours[prevIdx].homeId}|${tours[prevIdx].visitDate}` : null;
+    el.innerHTML = noneOpt + opts;
+    if (prevKey){
+      const matchIdx = tours.findIndex(t => `${t.homeId}|${t.visitDate}` === prevKey);
+      el.value = matchIdx >= 0 ? String(matchIdx) : (i < tours.length ? String(i) : '');
+    } else {
+      el.value = i < tours.length ? String(i) : '';
+    }
+  });
+}
+
+function renderTourCompare(tours){
+  const picks = ['tcSelA','tcSelB','tcSelC'].map(id => {
+    const el = document.getElementById(id);
+    const val = el ? el.value : '';
+    return val !== '' ? tours[parseInt(val)] : null;
+  });
+
+  const headers = picks.map(t => t
+    ? `<th>${t.homeId}<br><span style="font-weight:400;font-size:10px;opacity:.7;">${[t.community, t.visitDate].filter(Boolean).join(' · ')}</span></th>`
+    : `<th style="color:#ccc;">—</th>`).join('');
+
+  const rowsHTML = TOUR_COMPARE_ROWS.map(([key, label, type]) => {
+    if (!key) return `<tr class="tc-section-row"><td colspan="4">${label}</td></tr>`;
+    const cells = picks.map(t => {
+      if (!t) return '<td style="color:#ccc;font-style:italic;">—</td>';
+      return `<td>${tourCellHTML(t[key] || '', type)}</td>`;
+    }).join('');
+    return `<tr><td class="tc-label-col">${label}</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="tour-compare-wrap">
+    <table class="tc-table">
+      <thead><tr><th>Criterion</th>${headers}</tr></thead>
+      <tbody>${rowsHTML}</tbody>
+    </table>
+  </div>`;
+}
+
+function jumpToTourCard(key){
+  setTourView('scorecard');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const card = document.querySelector(`.tour-card[data-tourkey="${CSS.escape(key)}"]`);
+    if (!card) return;
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+    card.classList.remove('highlight');
+    void card.offsetWidth;
+    card.classList.add('highlight');
+  }));
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.jump-tour-btn');
+  if (btn) jumpToTourCard(btn.dataset.tourkey);
+});
+
+function renderTourTable(tours){
+  if (!tours.length) return '<div class="homes-empty">No tour records match the current filter.</div>';
+  const rows = tours.map((t, i) => {
+    const dec = (t.decision || '').toLowerCase();
+    const decCls = dec === 'active' ? 'tdb-active' : dec === 'pending' ? 'tdb-pending' : 'tdb-rejected';
+    const decBadge = t.decision ? `<span class="tour-decision-badge ${decCls}">${t.decision}</span>` : '—';
+    const wcCell = t.enclosedWC
+      ? (t.enclosedWC.toLowerCase() === 'yes' ? '<span class="tc-yes">✓</span>' : '<span class="tc-no">✗</span>')
+      : '—';
+    const tubCell = t.tubIncluded
+      ? (t.tubIncluded.toLowerCase() === 'yes' ? '<span class="tc-neg">✗ Yes</span>' : '<span class="tc-yes">✓ No</span>')
+      : '—';
+    const cooking = t.cookingAppliances
+      ? t.cookingAppliances.split(',').map(s => `<div style="font-size:11px;">• ${s.trim()}</div>`).join('')
+      : '—';
+    const addrCommunity = [t.community, t.address].filter(Boolean).join(' · ');
+    const tourKey = `${t.homeId}|${t.visitDate}`.replace(/"/g,'&quot;');
+    const jumpBtn = `<button class="jump-tour-btn" data-tourkey="${tourKey}" title="View scorecard">⊞</button>`;
+    return `<tr>
+      <td class="td-addr">${t.homeId}${jumpBtn}<span class="td-community">${addrCommunity}</span></td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;white-space:nowrap;">${t.visitDate || '—'}</td>
+      <td>${decBadge}</td>
+      <td style="white-space:normal;max-width:180px;">${t.decisionNotes ? `<span style="font-size:12px;color:#5b6359;">${t.decisionNotes}</span>` : '—'}</td>
+      <td>${wcCell}</td>
+      <td>${tubCell}</td>
+      <td style="white-space:normal;min-width:160px;">${cooking}</td>
+      <td>${t.utilities || '—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${t.houseSize || '—'}</td>
+      <td>${t.houseSpacing || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="overflow-x:auto;">
+    <table class="homes-table">
+      <thead><tr>
+        <th>Home · Location</th>
+        <th>Visit Date</th>
+        <th>Decision</th>
+        <th>Decision Notes</th>
+        <th>Enclosed WC</th>
+        <th>Tub</th>
+        <th>Cooking Appliances</th>
+        <th>Utilities</th>
+        <th>House Size</th>
+        <th>House Spacing</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function applyTourView(){
+  const filter   = document.getElementById('tcHomeFilter')?.value || '';
+  const decFilter = document.getElementById('tcDecisionFilter')?.value || '';
+  const filtered = (lastTourData || []).filter(t => {
+    if (filter    && t.homeId   !== filter)                              return false;
+    if (decFilter && (t.decision||'').toLowerCase() !== decFilter.toLowerCase()) return false;
+    return true;
+  });
+
+  const content = document.getElementById('tourContent');
+  const compareSelects = document.getElementById('tourCompareSelects');
+  if (!content) return;
+
+  if (tourView === 'compare'){
+    buildTourCompareSelects(filtered);
+    compareSelects.style.display = '';
+    content.innerHTML = renderTourCompare(filtered);
+  } else if (tourView === 'table'){
+    compareSelects.style.display = 'none';
+    content.innerHTML = renderTourTable(filtered);
+  } else {
+    compareSelects.style.display = 'none';
+    content.innerHTML = !filtered.length
+      ? '<div class="homes-empty">No tour notes yet — submit the Google Form after each visit.</div>'
+      : `<div class="tour-grid">${filtered.map((t,i) => tourCardHTML(t,i)).join('')}</div>`;
+  }
+  document.getElementById('tvScorecard')?.classList.toggle('active', tourView === 'scorecard');
+  document.getElementById('tvTable')?.classList.toggle('active', tourView === 'table');
+  document.getElementById('tvCompare')?.classList.toggle('active', tourView === 'compare');
+}
+
+function setTourView(view){
+  tourView = view;
+  applyTourView();
+}
+
+async function loadTourNotes(forceRefresh){
+  if (lastTourData && !forceRefresh){ applyTourView(); return; }
+  const statusEl = document.getElementById('tourStatus');
+  const filterBar = document.getElementById('tourFilterBar');
+  if (statusEl) statusEl.innerHTML = '<div class="homes-loading">Loading tour notes…</div>';
+  if (filterBar) filterBar.style.display = 'none';
+  try {
+    const res = await fetch(TOUR_API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    lastTourData = parseTourNotes(json).sort((a,b) => new Date(b.visitDate) - new Date(a.visitDate));
+    if (statusEl) statusEl.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9aa193;margin-bottom:12px;">
+      ${lastTourData.length} tour record${lastTourData.length !== 1 ? 's' : ''} &middot; Last refreshed: ${fmtTimestamp(new Date())} &middot;
+      <button onclick="loadTourNotes(true)" style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:none;color:var(--brass);cursor:pointer;text-decoration:underline;padding:0;">Refresh now</button>
+    </div>`;
+    // populate home filter
+    const homes = [...new Set(lastTourData.map(t => t.homeId).filter(Boolean))].sort();
+    const hf = document.getElementById('tcHomeFilter');
+    if (hf) hf.innerHTML = '<option value="">All homes</option>' + homes.map(h => `<option value="${h}">${h}</option>`).join('');
+    if (filterBar) filterBar.style.display = '';
+    applyTourView();
+  } catch(e){
+    if (statusEl) statusEl.innerHTML = `<div class="homes-error">Could not load tour notes — ${e.message}. Make sure the Apps Script has been redeployed with the updated code, then <button onclick="loadTourNotes(true)" style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:none;border:none;color:var(--rust);cursor:pointer;text-decoration:underline;padding:0;font-weight:600;">try again</button>.</div>`;
+    lastTourData = null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// tabs
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const targetId = btn.dataset.tab === 'map' ? 'map-panel' : btn.dataset.tab;
+    document.getElementById(targetId).classList.add('active');
+    if (btn.dataset.tab === 'map') initMap();
+    if (btn.dataset.tab === 'summary') renderSummary();
+    if (btn.dataset.tab === 'homes') loadHomes();
+    if (btn.dataset.tab === 'tour') loadTourNotes();
+    if (btn.dataset.tab === 'requirements') renderRequirements();
+    currentTab = targetId;
+    updateHero(currentTab);
+  });
+});
+
+['ss','dist','homeval','filing','spend'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', renderLedger);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Version + page load timestamp
+  const pageLoaded = new Date();
+  const loadedStr = pageLoaded.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) +
+    ' at ' + pageLoaded.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const vb = document.getElementById('versionBadge');
+  if (vb) vb.textContent = APP_VERSION;
+  const fv = document.getElementById('footerVersion');
+  if (fv) fv.textContent = `${APP_VERSION} · Page loaded ${loadedStr}`;
+
+  syncToggleUI();
+  renderLedger();
+  renderHomePrices();
+  renderReference();
+  initCompare3();
+  renderChecklist();
+  renderPolitics();
+  renderRejected();
+  renderDiversity();
+
+  document.getElementById('propTaxToggle').addEventListener('click', () => {
+    savePropTaxMode(propTaxMode === 'custom' ? 'market' : 'custom');
+    syncToggleUI();
+    renderLedger();
+  });
+  document.getElementById('compareA').addEventListener('change', renderLedger);
+  document.getElementById('compareB').addEventListener('change', renderLedger);
+});
+</script>
+</body>
+</html>
